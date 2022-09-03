@@ -1,0 +1,26 @@
+﻿@model AuthenticationModel
+
+<div>@Context.User.Identity.Name</div>
+<div class="text-center">
+    <form asp-controller="Auth" asp-action="Login" method="post">
+        @Html.AntiForgeryToken()
+        
+        @Html.TextBoxFor(m => m.Email)
+        <br />
+        @Html.PasswordFor(m => m.Password)
+        <br />
+        <button type="submit">Login</button>
+    </form>
+    <br />
+    <hr />
+    <br />
+    <form asp-controller="Auth" asp-action="Register" method="post">
+        @Html.AntiForgeryToken()
+
+        @Html.TextBoxFor(m => m.Email)
+        <br />
+        @Html.PasswordFor(m => m.Password)
+        <br />
+        <button type="submit">Register</button>
+    </form>
+</div>
