@@ -1,7 +1,4 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Newtonsoft.Json;
-using System.Security.Claims;
-using WebCrudProject.Models;
+using WebCrudProject.Auth;
 using WebCrudProject.Service;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,11 +6,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-var connectionString = "data source=LAPTOP-BORIS;initial catalog=webcrudproject;persist security info=True;Integrated Security=SSPI;";
+var connectionString = builder.Configuration.GetConnectionString("Default");
 
 builder.Services.AddScoped(p => { return new UserDbService(connectionString); });
 
 var app = builder.Build();
+
+app.Use(SignInMiddelware.CheckSignIn);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -28,38 +27,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
-app.Use(async (context, next) =>
-{
-    if (!context.User.Identity.IsAuthenticated && context.Request.Path.Value != "/Auth/Index")
-    {
-        var hasCookie = context.Request.Cookies.TryGetValue("cookies", out var userAuth);
-
-        if (hasCookie)
-        {
-            var model = JsonConvert.DeserializeObject<AuthenticationModel>(userAuth);
-            var claims = new[] {
-                    new Claim(ClaimTypes.Email, model.Email, ClaimTypes.Name, model.Email),
-                };
-            ClaimsIdentity identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            ClaimsPrincipal principal = new ClaimsPrincipal(identity);
-            context.User = principal;
-        }
-        else
-        {
-            var path = context.Request.Path.ToString();
-
-            if (path.Contains("Auth"))
-                path = "/";
-
-            context.Response.Redirect($"/Auth/Index?rtnUrl={path}");
-        }
-
-    }
-   
-    await next();
-
-});
 
 app.MapControllerRoute(
     name: "default",

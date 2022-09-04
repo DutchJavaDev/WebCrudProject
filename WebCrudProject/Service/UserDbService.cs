@@ -1,6 +1,9 @@
 ﻿using Dapper;
+using System.Linq;
+using BCryptNet = BCrypt.Net.BCrypt;
 using System.Data.SqlClient;
 using WebCrudProject.Auth.Models;
+using System.Security.Cryptography.Xml;
 
 namespace WebCrudProject.Service
 {
@@ -14,39 +17,62 @@ namespace WebCrudProject.Service
             _connectionString = connectionString;
         }
 
-
-        public async Task<bool> RegisterAsync(UserModel userModel)
+        public async Task<UserModel> RegisterAsync(UserModel userModel)
         {
             using (connection = new SqlConnection(_connectionString))
             {
+                var checkUserSql = "SELECT * FROM tblUser WHERE userEmail= @Email";
+                var param = new { Email = userModel.UserEmail };
+
                 connection.Open();
-                var user = await connection.QueryFirstOrDefaultAsync<UserModel>("SELECT * FROM tblUser WHERE userEmail= @Email", new { userModel.Email });
+                var user = await connection.QueryFirstOrDefaultAsync<UserModel>(checkUserSql, param);
 
-                if (user != null)
-                    return false;
+                if (user == null)
+                {
+                    string passwordHash = BCryptNet.HashPassword(userModel.UserPassword);
 
-                var sql = @$"INSERT INTO [dbo].[tblUser]
-                            (userEmail, userPassword)
-                            VALUES(@Email,@Password)";
+                    userModel.UserReference = Guid.NewGuid().ToString();
 
-                var result = await connection.ExecuteAsync(sql, new { userModel.Email, userModel.Password });
+                    var insertUserSql = @$"INSERT INTO [dbo].[tblUser]
+                            (userReference, userEmail, userPassword)
+                            VALUES(@UserReference, @UserEmail,@UserPassword)";
 
-                return result == 1;
+                    var result = await connection.ExecuteAsync(insertUserSql, new
+                    {
+                        userModel.UserReference,
+                        userModel.UserEmail,
+                        UserPassword = passwordHash
+                    });
+
+                    if (result == 1)
+                    {
+                        return await connection.QueryFirstOrDefaultAsync<UserModel>("SELECT * FROM tblUser");
+                    }
+                }
+
+                return null;
             }
         }
 
-        public async Task<bool> LoginAsync(UserModel userModel)
+        public async Task<UserModel> LoginAsync(UserModel userModel)
         {
             using (connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                var sql = "SELECT * FROM tblUser WHERE userEmail = @Email AND userPassword = @Password";
-                var user = await connection.QueryFirstOrDefaultAsync<UserModel>(sql, new { userModel.Email, userModel.Password });
+                var sql = "SELECT * FROM tblUser WHERE userEmail = @UserEmail";
+                var user = await connection.QueryFirstOrDefaultAsync<UserModel>(sql, new { userModel.UserEmail });
 
-                if (user != null)
-                    return true;
+                if (user != null)   
+                {
+                    var same = BCryptNet.Verify(userModel.UserPassword, user.UserPassword);
 
-                return false;
+                    if(same)
+                    {
+                        return user;
+                    }
+                }
+
+                return null;
             }
         }
     }

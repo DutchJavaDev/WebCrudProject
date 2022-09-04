@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System.Security.Claims;
+using WebCrudProject.Auth;
 using WebCrudProject.Models;
 using WebCrudProject.Service;
 
@@ -15,21 +15,24 @@ namespace WebCrudProject.Controllers
                 Redirect(rtnUrl);
             }
 
-            return View(new AuthenticationModel { ReturnUrl = rtnUrl });
+            return View(new AuthenticationModel { ReturnUrl = rtnUrl, Email = "admin@webcrud.com", Password = "P@ssw0rd!" });
         }
 
         [AutoValidateAntiforgeryToken]
-        public async Task<IActionResult> Login([FromForm] AuthenticationModel authenticationModel,
+        [HttpPost]
+        public async Task<IActionResult> Login(
+            [FromForm] AuthenticationModel authenticationModel,
             [FromServices] UserDbService userDbService)
         {
             var result = await userDbService.LoginAsync(new Auth.Models.UserModel 
             {
-                Email = authenticationModel.Email,
-                Password = authenticationModel.Password,
+                UserEmail = authenticationModel.Email,
+                UserPassword = authenticationModel.Password,
             });
 
-            if (result)
+            if (result != null)
             {
+                authenticationModel.ReferenceId = result.UserReference;
                 SetCookie(authenticationModel);
                 return Redirect(authenticationModel.ReturnUrl);
             }
@@ -38,28 +41,31 @@ namespace WebCrudProject.Controllers
         }
 
         [AutoValidateAntiforgeryToken]
-        public async Task<IActionResult> RegisterAsync([FromForm] AuthenticationModel authenticationModel,
+        [HttpPost]
+        public async Task<IActionResult> Register(
+            [FromForm] AuthenticationModel authenticationModel,
             [FromServices] UserDbService userDbService)
         {
             var result = await userDbService.RegisterAsync(new Auth.Models.UserModel
             {
-                Email = authenticationModel.Email,
-                Password = authenticationModel.Password,
+                UserEmail = authenticationModel.Email,
+                UserPassword = authenticationModel.Password,
             });
 
-            if (result)
+            if (result != null)
             {
+                authenticationModel.ReferenceId = result.UserReference;
                 SetCookie(authenticationModel);
                 return RedirectPermanent(authenticationModel.ReturnUrl);
             }
 
-            return Index(authenticationModel.ReturnUrl ?? "Errororor");
+            return RedirectToAction("Index", new { rtnUrl = authenticationModel.ReturnUrl});
         }
 
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            Response.Cookies.Delete("cookies");
+            Response.Cookies.Delete(SignInMiddelware.SignIngCookie);
 
             return RedirectToAction("Index");
         }
@@ -69,7 +75,8 @@ namespace WebCrudProject.Controllers
         {
             authenticationModel.Password = string.Empty;
 
-            Response.Cookies.Append("cookies", JsonConvert.SerializeObject(authenticationModel));
+            Response.Cookies.Append(SignInMiddelware.SignIngCookie,
+                JsonConvert.SerializeObject(authenticationModel));
         }
     }
 }

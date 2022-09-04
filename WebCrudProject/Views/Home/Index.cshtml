@@ -1,7 +1,25 @@
-﻿@{
+﻿@using System.Security.Claims
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-   <h1>Lets go</h1>
+   
+    <span>Lets go!!</span>
+    <br />
+    <span>Create a document that can be saved, binden to c# class model | database</span>
+    <br />
+    <span>Upload files: images and text files</span>
+    <br />
+    <span>Able to create and delete images and text files</span>
+    <br />
+
+    @if (Context.User.Identity.IsAuthenticated)
+    {
+        var user = (ClaimsIdentity)Context.User.Identity;
+
+        var userEmail = user.Claims.Where(i => i.Type.Contains("emailaddress"));
+        var userId = user.Claims.Where(i => i.Type.Contains("nameidentifier"));
+    }
+
 </div>

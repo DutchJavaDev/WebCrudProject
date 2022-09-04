@@ -5,9 +5,9 @@
     <form asp-controller="Auth" asp-action="Login" method="post">
         @Html.AntiForgeryToken()
         @Html.HiddenFor(m => m.ReturnUrl)
-        @Html.TextBoxFor(m => m.Email)
+        @Html.TextBoxFor(m => m.Email, new { required="required", type="email" })
         <br />
-        @Html.PasswordFor(m => m.Password)
+        @Html.PasswordFor(m => m.Password, new { required="required", value=$"{Model.Password}" })
         <br />
         <button type="submit">Login</button>
     </form>
@@ -17,9 +17,9 @@
     <form asp-controller="Auth" asp-action="Register" method="post">
         @Html.AntiForgeryToken()
         @Html.HiddenFor(m => m.ReturnUrl)
-        @Html.TextBoxFor(m => m.Email)
+        @Html.TextBoxFor(m => m.Email, new { required="required", type="email"})
         <br />
-        @Html.PasswordFor(m => m.Password)
+        @Html.PasswordFor(m => m.Password, new { required="required", value=$"{Model.Password}"  })
         <br />
         <button type="submit">Register</button>
     </form>
