@@ -26,6 +26,18 @@ namespace WebCrudProject.Service
             }
         }
 
+        public async Task<UserDocument> GetUserDocumentByNumberAsync(int DocumentNumber)
+        {
+            using(connection = new SqlConnection(_connectionString))
+            {
+                connection.Open();
+                var sql = $@"SELECT * FROM tblDocument WHERE documentNumber = @DocumentNumber";
+                var param = new { DocumentNumber };
+
+                return await connection.QueryFirstAsync<UserDocument>(sql, param);
+            }
+        }
+
         public async Task<bool> CreateDocumentAsync(string user, UserDocument document)
         {
             using (connection = new SqlConnection(_connectionString))
@@ -66,15 +78,18 @@ namespace WebCrudProject.Service
             {
                 connection.Open();
                 var sql = @$"UPDATE [dbo].[tblDocument] 
-                                  SET documentCreateDate, documentDescription
+                                  SET documentTitle = @documentTitle,
+                                      documentCreateDate = @documentCreateDate,
+                                      documentDescription = @documentDescription
                                   WHERE documentNumber = @documentNumber";
 
 
                 var docParams = new
                 {
-                    document.DocumentNumber,
+                    document.DocumentTitle,
                     document.DocumentCreateDate,
-                    document.DocumentDescription
+                    document.DocumentDescription,
+                    document.DocumentNumber
                 };
 
                 return await connection.ExecuteAsync(sql, docParams) == 1;

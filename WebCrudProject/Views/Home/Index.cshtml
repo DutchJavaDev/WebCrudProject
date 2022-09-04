@@ -17,8 +17,8 @@
        {
            <div class="border-2">
                <p>@doc.DocumentTitle</p>
-               <a asp-controller="Document" asp-action="Edit">Edit</a>
-               <a asp-controller="Document" asp-action="Delete">Delete</a>
+                    @Html.ActionLink("Edit","Update","Document", new { number = doc.DocumentNumber }, new {});
+                    @Html.ActionLink("Delete", "DeleteDocument", "Document", new  { number = doc.DocumentNumber }, new{})
            </div>
        }
        </div>

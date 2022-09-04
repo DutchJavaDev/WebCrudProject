@@ -5,17 +5,10 @@ namespace WebCrudProject.Controllers
 {
     public class BaseController : Controller
     {
-
-        public BaseController() 
-        {
-            ViewBag.IsAuthenticated = IsAuthenticated;
-        }
-
-        public bool IsAuthenticated => _Auth();
-
+        public bool IsAuthenticated => Auth();
 
         [NonAction]
-        private bool _Auth()
+        private bool Auth()
         {
             if(HttpContext == null) return false;
 
@@ -30,13 +23,12 @@ namespace WebCrudProject.Controllers
         public string[] GetUserInfo()
         {
             if (!IsAuthenticated)
-                return new string[] { };
+                return Array.Empty<string>();
 
+            var user = HttpContext.User.Identity as ClaimsIdentity;
 
-            var user = (ClaimsIdentity)HttpContext.User.Identity;
-
-            var userEmail = user.Claims.Where(i => i.Type.Contains("emailaddress")).FirstOrDefault();
-            var userId = user.Claims.Where(i => i.Type.Contains("nameidentifier")).FirstOrDefault();
+            var userEmail = user?.Claims.FirstOrDefault(i => i.Type.Contains("emailaddress"));
+            var userId = user?.Claims.FirstOrDefault(i => i.Type.Contains("nameidentifier"));
 
             return new[] { userId.Value, userEmail.Value };
         }
