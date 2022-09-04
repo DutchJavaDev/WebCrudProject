@@ -46,8 +46,13 @@ app.Use(async (context, next) =>
             context.User = principal;
         }
         else
-        { 
-            context.Response.Redirect($"/Auth/Index?rtnUrl={context.Request.Path}");
+        {
+            var path = context.Request.Path.ToString();
+
+            if (path.Contains("Auth"))
+                path = "/";
+
+            context.Response.Redirect($"/Auth/Index?rtnUrl={path}");
         }
 
     }

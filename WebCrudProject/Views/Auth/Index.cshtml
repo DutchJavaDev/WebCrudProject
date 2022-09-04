@@ -4,7 +4,7 @@
 <div class="text-center">
     <form asp-controller="Auth" asp-action="Login" method="post">
         @Html.AntiForgeryToken()
-        
+        @Html.HiddenFor(m => m.ReturnUrl)
         @Html.TextBoxFor(m => m.Email)
         <br />
         @Html.PasswordFor(m => m.Password)
@@ -16,7 +16,7 @@
     <br />
     <form asp-controller="Auth" asp-action="Register" method="post">
         @Html.AntiForgeryToken()
-
+        @Html.HiddenFor(m => m.ReturnUrl)
         @Html.TextBoxFor(m => m.Email)
         <br />
         @Html.PasswordFor(m => m.Password)

@@ -8,10 +8,12 @@ namespace WebCrudProject.Controllers
 {
     public class AuthController : Controller
     {
-        public IActionResult Index(string? rtnUrl)
+        public IActionResult Index(string rtnUrl = "/")
         {
             if (User.Identity.IsAuthenticated)
-                Redirect(rtnUrl ?? "/");
+            {
+                Redirect(rtnUrl);
+            }
 
             return View(new AuthenticationModel { ReturnUrl = rtnUrl });
         }
@@ -20,7 +22,6 @@ namespace WebCrudProject.Controllers
         public async Task<IActionResult> Login([FromForm] AuthenticationModel authenticationModel,
             [FromServices] UserDbService userDbService)
         {
-
             var result = await userDbService.LoginAsync(new Auth.Models.UserModel 
             {
                 Email = authenticationModel.Email,
@@ -30,19 +31,16 @@ namespace WebCrudProject.Controllers
             if (result)
             {
                 SetCookie(authenticationModel);
-                return Redirect(authenticationModel.ReturnUrl ?? "/");
+                return Redirect(authenticationModel.ReturnUrl);
             }
 
             return View();
         }
 
         [AutoValidateAntiforgeryToken]
-        public async Task<IActionResult> Register([FromForm] AuthenticationModel authenticationModel,
+        public async Task<IActionResult> RegisterAsync([FromForm] AuthenticationModel authenticationModel,
             [FromServices] UserDbService userDbService)
         {
-
-            // Verify user
-            // db call
             var result = await userDbService.RegisterAsync(new Auth.Models.UserModel
             {
                 Email = authenticationModel.Email,
@@ -52,10 +50,18 @@ namespace WebCrudProject.Controllers
             if (result)
             {
                 SetCookie(authenticationModel);
-                return RedirectPermanent(authenticationModel.ReturnUrl ?? "/");
+                return RedirectPermanent(authenticationModel.ReturnUrl);
             }
 
             return Index(authenticationModel.ReturnUrl ?? "Errororor");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Logout()
+        {
+            Response.Cookies.Delete("cookies");
+
+            return RedirectToAction("Index");
         }
 
         [NonAction]
