@@ -1,18 +1,29 @@
 ﻿@using System.Security.Claims
+@model List<UserDocument>
 @{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
    
-    <span>Lets go!!</span>
-    <br />
-    <span>Create a document that can be saved, binden to c# class model | database</span>
-    <br />
-    <span>Upload files: images and text files</span>
-    <br />
-    <span>Able to create and delete images and text files</span>
-    <br />
+   <a asp-controller="Document" asp-action="Index">Create Document</a>
+
+    @if (Model != null)
+    {
+           <div>
+       <p>documents</p>
+
+       @foreach (var doc in Model)
+       {
+           <div class="border-2">
+               <p>@doc.DocumentTitle</p>
+               <a asp-controller="Document" asp-action="Edit">Edit</a>
+               <a asp-controller="Document" asp-action="Delete">Delete</a>
+           </div>
+       }
+       </div>
+    }
+
 
     @if (Context.User.Identity.IsAuthenticated)
     {

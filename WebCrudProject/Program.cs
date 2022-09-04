@@ -9,6 +9,7 @@ builder.Services.AddControllersWithViews();
 var connectionString = builder.Configuration.GetConnectionString("Default");
 
 builder.Services.AddScoped(p => { return new UserDbService(connectionString); });
+builder.Services.AddScoped(p => { return new UserDocumentDbService(connectionString); });
 
 var app = builder.Build();
 
