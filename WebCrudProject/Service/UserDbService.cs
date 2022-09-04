@@ -1,16 +1,14 @@
 ﻿using Dapper;
-using System.Linq;
 using BCryptNet = BCrypt.Net.BCrypt;
 using System.Data.SqlClient;
 using WebCrudProject.Auth.Models;
-using System.Security.Cryptography.Xml;
 
 namespace WebCrudProject.Service
 {
     public class UserDbService
     {
         private readonly string _connectionString;
-        private SqlConnection connection;
+        private SqlConnection? connection;
         
         public UserDbService(string connectionString)
         {
@@ -31,8 +29,6 @@ namespace WebCrudProject.Service
                 {
                     string passwordHash = BCryptNet.HashPassword(userModel.UserPassword);
 
-                    userModel.UserReference = Guid.NewGuid().ToString();
-
                     var insertUserSql = @$"INSERT INTO [dbo].[tblUser]
                             (userReference, userEmail, userPassword)
                             VALUES(@UserReference, @UserEmail,@UserPassword)";
@@ -46,7 +42,7 @@ namespace WebCrudProject.Service
 
                     if (result == 1)
                     {
-                        return await connection.QueryFirstOrDefaultAsync<UserModel>("SELECT * FROM tblUser");
+                        return await connection.QueryFirstOrDefaultAsync<UserModel>(checkUserSql,param);
                     }
                 }
 

@@ -1,17 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using WebCrudProject.Models;
 using WebCrudProject.Service;
 
 namespace WebCrudProject.Controllers
 {
-    public class DocumentController : Controller
+    public class DocumentController : BaseController
     {
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             return View();
         }
-
 
         [HttpPost]
         [AutoValidateAntiforgeryToken]
@@ -23,17 +21,6 @@ namespace WebCrudProject.Controllers
             var result = await userDocumentDb.CreateDocumentAsync(user, userDocument);
 
             return result ? RedirectToAction("Index") : BadRequest();
-        }
-
-        [NonAction]
-        public string[] GetUserInfo()
-        {
-            var user = (ClaimsIdentity)HttpContext.User.Identity;
-
-            var userEmail = user.Claims.Where(i => i.Type.Contains("emailaddress")).FirstOrDefault();
-            var userId = user.Claims.Where(i => i.Type.Contains("nameidentifier")).FirstOrDefault();
-
-            return new[] { userId.Value, userEmail.Value };
         }
     }
 }

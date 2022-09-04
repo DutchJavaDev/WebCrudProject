@@ -7,7 +7,7 @@ namespace WebCrudProject.Service
     public class UserDocumentDbService
     {
         private readonly string _connectionString;
-        private SqlConnection connection;
+        private SqlConnection? connection;
         public static readonly Random random = new Random();
 
         public UserDocumentDbService(string connectionString)
