@@ -9,7 +9,7 @@ namespace WebCrudProject.Auth
     public static class SignInMiddelware
     {
 
-        public static readonly string SignIngCookie = "_sgnCku343=";
+        public static readonly string SignIngCookie = "sgnCku343";
 
         /// <summary>
         /// Checks if there is a signin cookie, if so redirect to previous url or else to /, else send to register & login
