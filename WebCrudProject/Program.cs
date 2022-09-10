@@ -10,9 +10,11 @@ var connectionString = builder.Configuration.GetConnectionString("Default");
 
 builder.Services.AddScoped(p => { return new UserDbService(connectionString); });
 builder.Services.AddScoped(p => { return new UserDocumentDbService(connectionString); });
+builder.Services.AddScoped(p => { return new UserFileService(connectionString); });
 
 var app = builder.Build();
 
+app.Use(UploadMiddelware.UploadFilter);
 app.Use(SignInMiddelware.CheckSignIn);
 
 // Configure the HTTP request pipeline.

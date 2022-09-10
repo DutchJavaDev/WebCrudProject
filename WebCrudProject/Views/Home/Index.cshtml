@@ -24,13 +24,14 @@
        </div>
     }
 
-
-    @if (Context.User.Identity.IsAuthenticated)
-    {
-        var user = (ClaimsIdentity)Context.User.Identity;
-
-        var userEmail = user.Claims.Where(i => i.Type.Contains("emailaddress"));
-        var userId = user.Claims.Where(i => i.Type.Contains("nameidentifier"));
-    }
-
+    &nbsp;
+    <div class="w-50 text-center bg-info">
+        <form asp-controller="Upload" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <p>Select Files</p>
+            <input type="file" name="files" placeholder="Upload" accept="image/*" />
+            <br />
+            <input class="btn btn-primary" type="submit" value="Send" />
+        </form>
+    </div>
 </div>
