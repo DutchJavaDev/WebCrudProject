@@ -1,4 +1,25 @@
-﻿@model bool
+﻿@model List<UserFileModel>
 
 
-<h1>Uploaded: @Model</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Uploaded</th>
+            <th>State</th>
+        </tr>
+    </thead>
+
+    <tbody>
+       @foreach (var file in Model)
+       {
+           <tr>
+                <td>@file.Id</td>
+                <td>@file.Name</td>
+                <td>@file.UploadTime</td>
+                <td>@file.State</td>
+           </tr>
+       }
+    </tbody>
+</table>

@@ -14,7 +14,7 @@ builder.Services.AddScoped(p => { return new UserFileService(connectionString); 
 
 var app = builder.Build();
 
-app.Use(UploadMiddelware.UploadFilter);
+//app.Use(UploadMiddelware.UploadFilter);
 app.Use(SignInMiddelware.CheckSignIn);
 
 // Configure the HTTP request pipeline.

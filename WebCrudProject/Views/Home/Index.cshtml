@@ -26,7 +26,7 @@
 
     &nbsp;
     <div class="w-50 text-center bg-info">
-        <form asp-controller="Upload" method="post" enctype="multipart/form-data">
+        <form asp-controller="Upload" asp-action="Files" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
             <p>Select Files</p>
             <input type="file" name="files" placeholder="Upload" accept="image/*" />

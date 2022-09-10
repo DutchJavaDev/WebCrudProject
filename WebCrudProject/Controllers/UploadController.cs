@@ -1,19 +1,37 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebCrudProject.Models;
 using WebCrudProject.Service;
 
 namespace WebCrudProject.Controllers
 {
     public class UploadController : BaseController
     {
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Index([FromForm] IFormFileCollection files, [FromServices] UserFileService fileService)
+        [HttpGet]
+        public async Task<IActionResult> Index([FromServices] UserFileService fileService)
         {
             var userId = GetUserInfo()[0];
+            var userFiles = await fileService.ReadFiles(userId);
+            return View(userFiles);
+        }
 
-            var uploaded = await fileService.WriteFiles(userId, files);
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Files([FromForm] IFormFileCollection files, [FromServices] UserFileService fileService)
+        {
+            var userId = GetUserInfo()[0];
+            List<UserFileModel> userFiles;
 
-            return View(uploaded);
+            if (files == null)
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                // uploading
+                userFiles = await fileService.WriteFiles(userId, files);
+            }
+
+            return RedirectToAction("Index");
         }
     }
 }
