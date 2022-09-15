@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Auth\Models\" />
     <Folder Include="wwwroot\files\" />
   </ItemGroup>
 
