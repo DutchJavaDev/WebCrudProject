@@ -9,26 +9,31 @@ namespace WebCrudProject.Services.ORM.Models
     public class TableDefinition : ISqlModel
     {
         public Guid Id { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public int PropertyCount { get; set; }
-        public string PropertyArray { get; set; }
+        public string PropertyArray { get; set; } = string.Empty;
         public DateTime LastUpdated { get; set; }
         public DateTime DateCreated { get; set; }
 
 
         // returns array of (a,b),(a,b)
-        public string[] GetProperties() => PropertyArray.Split(",");
+        private string[] GetProperties() => PropertyArray.Split(",");
 
         public override bool Equals(object? obj)
         {
             if (obj != null && obj is TableDefinition definition)
             {
                 return Name.Equals(definition.Name) &&
-                       PropertyCount == definition.PropertyCount;
+                       PropertyCount == definition.PropertyCount
+                       && Enumerable.SequenceEqual(GetProperties(), definition.GetProperties());
             }
 
             return false;
         }
 
+        public override int GetHashCode()
+        {
+            return base.GetHashCode() * PropertyCount;
+        }
     }
 }

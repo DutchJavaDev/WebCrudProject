@@ -1,38 +1,39 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WebCrudProject.Services.ORM.Attributes;
 using WebCrudProject.Services.ORM.Interfaces;
-using WebCrudProject.Services.ORM.Types;
 
 namespace WebCrudProject.Services.ORM.Tests
 {
     [TestClass]
-    public sealed class InternalCommandsTests
+    public sealed class internalCreatorTests
     {
         //Model
-        private InternalCommands _model;
+        private InternalCreator _model;
 
         //Helpers
         private readonly Type _type = typeof(TestClass);
 
         [TestInitialize]
-        public void Init()
+        public async Task Init()
         {
-            _model = new InternalCommands("data source=LAPTOP-BORIS;initial catalog=webcrudproject;persist security info=True;Integrated Security=SSPI;");
+            _model = new InternalCreator("data source=LAPTOP-BORIS;initial catalog=webcrudproject;persist security info=True;Integrated Security=SSPI;");
         }
 
-        [TestMethod]
-        public void GetPropertiesTest1()
+        [TestMethod()]
+        public void InternalCreatorTests1()
         {
+            /// GetProperties
             // Act
             var props = _model.GetProperties(_type);
 
             // Assert
-            Assert.AreEqual(props.Count(), props.Count());
+            Assert.AreEqual(13, props.Count());
         }
 
-        [TestMethod]
-        public void GetTableClassTest2()
+        [TestMethod()]
+        public void InternalCreatorTests2()
         {
+            /// GetTableClass
             // Act
             var tableClass = _model.GetTableClass(_type);
 
@@ -41,13 +42,17 @@ namespace WebCrudProject.Services.ORM.Tests
         }
 
 
-        [TestMethod()]
-        public async Task CreateTableTest3()
+        [TestMethod]
+        public async Task InternalCreatorTests3()
         {
+            /// CreateTable, TableExist, GetTableDefinition
             // Arrange
             var props = _model.GetProperties(_type);
             var tableClass = _model.GetTableClass(_type);
-            var tableParams = SQLTypes.ConverToSQLTypes(props);
+            var tableParams = Common.ConverToSQLTypes(props);
+
+            // Delete to make sure
+            await _model.DeleteTableAsync(tableClass.TableName);
 
             // Act
             var created = await _model.CreateTableAsync(_type,tableClass.TableName, tableParams);
@@ -58,21 +63,6 @@ namespace WebCrudProject.Services.ORM.Tests
             Assert.IsTrue(created);
             Assert.IsTrue(exists);
             Assert.IsNotNull(defExists);
-        }
-
-        [TestMethod]
-        public async Task GetTableDefinitionsTest4() 
-        {
-            // Act
-            var insertedDefs = await _model.GetTableDefinitionsAsync();
-
-            // Assert
-            Assert.IsNotNull(insertedDefs);
-        }
-        
-        public async Task CleanUp()
-        {
-            await _model.DeleteTablesAsync();
         }
 
         [TableClass("testClass")]

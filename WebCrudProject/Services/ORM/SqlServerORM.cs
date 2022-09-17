@@ -1,19 +1,16 @@
 ﻿using WebCrudProject.Services.ORM.Attributes;
 using WebCrudProject.Services.ORM.Interfaces;
-using WebCrudProject.Services.ORM.Models;
 
 namespace WebCrudProject.Services.ORM
 {
     public sealed class SqlServerORM : IORM
     {
-        private InternalCommands _commands;
-        public string ConnectionString { get; private set; }
+        private InternalCreator internalCommands;
+        public string ConnectionString { get; private set; } = string.Empty;
 
         private readonly Type TableClassAttribute = typeof(TableClassAttribute);
-        private readonly Type TableDefinitionType = typeof(TableDefinition);
 
         private Type[] _typeCache;
-        private List<TableDefinition> _tableDefinitions;
 
         /// <summary>
         /// This assumes the db has already being created
@@ -26,11 +23,9 @@ namespace WebCrudProject.Services.ORM
         {
             ConnectionString = connectionString;
 
-            _tableDefinitions = new List<TableDefinition>();
+            _typeCache = models.ToArray();
 
-            _typeCache = models.Select(i => i.GetType()).ToArray();
-
-            _commands = new InternalCommands(ConnectionString);
+            internalCommands = new InternalCreator(ConnectionString);
 
             await BuildTableDefinitions();
         }
@@ -41,7 +36,7 @@ namespace WebCrudProject.Services.ORM
                 _typeCache.AsParallel()
                 .WithDegreeOfParallelism(5)
                 .ForAll(async i => await BuildTable(i));
-            });
+            }).ConfigureAwait(false);
         
 
         private async Task BuildTable(Type type)
@@ -50,11 +45,23 @@ namespace WebCrudProject.Services.ORM
                 Attribute.GetCustomAttribute(type, TableClassAttribute) 
                 is TableClassAttribute tableClass)
             {
-                await _commands.CreateTableAsync(type, tableClass.TableName, null);
-            }
+                var props = internalCommands.GetProperties(type);
+                var tableParams = Common.ConverToSQLTypes(props)
+                    .ToArray();
+
+                if (!await internalCommands.TableExistsAsync(tableClass.TableName))
+                {
+                    await internalCommands.CreateTableAsync(type, tableClass.TableName, tableParams);
+                }
+                else
+                {
+                    await internalCommands.CheckForTableDefinitionUpdate(type, tableClass, props, tableParams);
+                }
+            }  
             else
             { 
-                // Error or use object name
+                // Error or use object name or fuck you?
+                // Yep still fuck you for now :)
             }
         }
     }

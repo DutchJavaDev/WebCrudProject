@@ -1,10 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WebCrudProject.Services.ORM;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WebCrudProject.Services.ORM.Interfaces;
 using WebCrudProject.Services.ORM.Attributes;
 
@@ -13,7 +8,7 @@ namespace WebCrudProject.Services.ORM.Tests
     [TestClass()]
     public sealed class SqlServerORMTests
     {
-        private IORM _model;
+        private SqlServerORM _model;
         private readonly string ConnectionStrng = @"data source=LAPTOP-BORIS;initial catalog=webcrudproject;persist security info=True;Integrated Security=SSPI;";
 
         [TestInitialize]
@@ -35,8 +30,7 @@ namespace WebCrudProject.Services.ORM.Tests
 
             await _model.Init(ConnectionStrng, models);
 
-
-            Assert.Fail();
+            Assert.IsTrue(true);
         }
 
     }
@@ -51,7 +45,7 @@ namespace WebCrudProject.Services.ORM.Tests
         public DateTime DateTime { get; set; }
         public bool Bool { get; set; }
         public float Float { get; set; }
-        public double Double { get; set; }
+        public double dDouble { get; set; }
         public Guid Guid { get; set; }
         public byte Byte { get; set; }
         public short Schort { get; set; }
@@ -68,7 +62,7 @@ namespace WebCrudProject.Services.ORM.Tests
         public DateTime DateTime { get; set; }
         public bool Bool { get; set; }
         public float Float { get; set; }
-        public double Double { get; set; }
+        public double dDouble { get; set; }
         public Guid Guid { get; set; }
         public byte Byte { get; set; }
         public short Schort { get; set; }
@@ -85,7 +79,7 @@ namespace WebCrudProject.Services.ORM.Tests
         public DateTime DateTime { get; set; }
         public bool Bool { get; set; }
         public float Float { get; set; }
-        public double Double { get; set; }
+        public double dDouble { get; set; }
         public Guid Guid { get; set; }
         public byte Byte { get; set; }
         public short Schort { get; set; }

@@ -1,16 +1,16 @@
 ﻿using System.Reflection;
 
-namespace WebCrudProject.Services.ORM.Types
+namespace WebCrudProject.Services.ORM
 {
-    public sealed class SQLTypes
+    public static class Common
     {
         private readonly static Dictionary<Type, string> SQLServerTypes = new()
         {
-            {typeof(int), "INT"}, 
-            {typeof(double), "FLOAT"}, 
+            {typeof(int), "INT"},
+            {typeof(double), "FLOAT"},
             {typeof(string), "NVARCHAR(500)"},
-            {typeof(bool), "BIT" }, 
-            {typeof(Guid), "UNIQUEIDENTIFIER"}, 
+            {typeof(bool), "BIT" },
+            {typeof(Guid), "UNIQUEIDENTIFIER"},
             {typeof(float), "FLOAT" },
             {typeof(byte), "TINYINT" },
             {typeof(short), "SMALLINT" },
@@ -35,14 +35,19 @@ namespace WebCrudProject.Services.ORM.Types
 
         public static string GetSQLServerType(Type type)
         {
-            var _type =  SQLServerTypes[type];
+            var _type = SQLServerTypes[type];
 
-            if(string.IsNullOrEmpty(_type))
+            if (string.IsNullOrEmpty(_type))
             {
                 return string.Empty;
             }
 
             return _type;
+        }
+
+        public static string EncodeProperties(string name, string type)
+        {
+            return $"({name}:{type})";
         }
     }
 }

@@ -1,5 +1,4 @@
 using WebCrudProject.Auth;
-using WebCrudProject.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,10 +6,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 var connectionString = builder.Configuration.GetConnectionString("Default");
-
-builder.Services.AddScoped(p => { return new UserDbService(connectionString); });
-builder.Services.AddScoped(p => { return new UserDocumentDbService(connectionString); });
-builder.Services.AddScoped(p => { return new UserFileService(connectionString); });
 
 var app = builder.Build();
 
