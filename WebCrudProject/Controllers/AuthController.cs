@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using WebCrudProject.Auth;
-using WebCrudProject.Auth.Models;
 using WebCrudProject.Models;
-using WebCrudProject.Service;
 
 namespace WebCrudProject.Controllers
 {
@@ -22,12 +20,11 @@ namespace WebCrudProject.Controllers
         [AutoValidateAntiforgeryToken]
         [HttpPost]
         public async Task<IActionResult> Login(
-            [FromForm] AuthenticationModel authenticationModel,
-            [FromServices] UserDbService userDbService)
+            [FromForm] AuthenticationModel authenticationModel)
         {
             SetCookie(); 
 
-            var result = await userDbService.LoginAsync(new UserModel
+            var result = (new
             {
                 UserEmail = authenticationModel.Email,
                 UserPassword = authenticationModel.Password,
@@ -36,11 +33,11 @@ namespace WebCrudProject.Controllers
             return VerifyResult(authenticationModel, result);
         }
 
-        private IActionResult VerifyResult(AuthenticationModel authenticationModel, UserModel result)
+        private IActionResult VerifyResult(AuthenticationModel authenticationModel, object result)
         {
             if (result != null)
             {
-                authenticationModel.ReferenceId = result.UserReference;
+                //authenticationModel.ReferenceId = result.UserReference;
                 SetCookie(authenticationModel);
                 return Redirect(authenticationModel.ReturnUrl);
             }
@@ -51,12 +48,11 @@ namespace WebCrudProject.Controllers
         [AutoValidateAntiforgeryToken]
         [HttpPost]
         public async Task<IActionResult> Register(
-            [FromForm] AuthenticationModel authenticationModel,
-            [FromServices] UserDbService userDbService)
+            [FromForm] AuthenticationModel authenticationModel)
         {
             ///SetCookie();
 
-;            var result = await userDbService.RegisterAsync(new UserModel
+;            var result = (new
             {
                 UserEmail = authenticationModel.Email,
                 UserPassword = authenticationModel.Password,

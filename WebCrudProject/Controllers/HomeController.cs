@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using System.Security.Claims;
 using WebCrudProject.Models;
-using WebCrudProject.Service;
 
 namespace WebCrudProject.Controllers
 {
@@ -15,14 +13,9 @@ namespace WebCrudProject.Controllers
             _logger = logger;
         }
 
-        public async Task<IActionResult> Index([FromServices] UserDocumentDbService userDocumentDb)
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            if (IsAuthenticated)
-            {
-                var docs = await userDocumentDb.GetUserDocumentsAsync(GetUserInfo()[0]);
-                return View(docs);
-            }
-
             return View();
         }
 
