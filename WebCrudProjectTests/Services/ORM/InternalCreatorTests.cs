@@ -65,6 +65,30 @@ namespace WebCrudProject.Services.ORM.Tests
             Assert.IsNotNull(defExists);
         }
 
+        [TestMethod]
+        public async Task InternalCreatorTests4()
+        {
+            // CheckForTableDefinitionUpdate
+
+
+        }
+
+        [TestCleanup]
+        public void CleanUp()
+        {
+            _model.DeleteTablesAsync().Wait();
+        }
+
+        [TableClass("tblDynamicClass")]
+        public sealed class DynamicClass : ISqlModel
+        {
+            public Guid Id { get; set; }
+            public DateTime LastUpdated { get; set; }
+            public DateTime DateCreated { get; set; }
+
+            //:)
+        }
+
         [TableClass("testClass")]
         public sealed class TestClass : ISqlModel
         {

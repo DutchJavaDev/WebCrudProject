@@ -139,8 +139,6 @@ namespace WebCrudProject.Services.ORM
 
                 return true;
             }
-
-            // Update cache?
         }
 
         public async Task DeleteTableAsync(string tableName)
@@ -168,6 +166,9 @@ namespace WebCrudProject.Services.ORM
             try
             {
                 var def = await GetTableDefinitionsAsync();
+
+                if(def.Count() == 0)
+                    return;
 
                 using (var connection = CreateConnecton())
                 {
@@ -238,6 +239,17 @@ namespace WebCrudProject.Services.ORM
             {
                 // Run update 
                 // Alter table
+
+                var oldDef = Common.DecodeProperties(dbDefinition.PropertyArray);
+                var newDef = Common.DecodeProperties(newDefinition.PropertyArray);
+                var deleDef = oldDef.
+                    Where(i => !newDef.Contains(i))
+                    .Select(i => $"DELETE COLUMN {i};").ToList();
+                var addDef = newDef.
+                    Where(i => !oldDef.Contains(i))
+                    .Select(i => $"ADD COLUMN {i}").ToList();
+
+
             }
         }
 

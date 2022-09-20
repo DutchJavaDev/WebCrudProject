@@ -49,5 +49,16 @@ namespace WebCrudProject.Services.ORM
         {
             return $"({name}:{type})";
         }
+
+        public static string[] DecodeProperties(string str)
+        {
+            return str.Split(",")
+                .Select(i => 
+                    i.Replace(":","")
+                    .Replace("(","")
+                    .Replace(")","")
+                )
+                .ToArray();
+        }
     }
 }

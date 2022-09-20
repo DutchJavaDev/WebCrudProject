@@ -25,6 +25,8 @@ namespace WebCrudProject.Services.ORM.Models
             {
                 return Name.Equals(definition.Name) &&
                        PropertyCount == definition.PropertyCount
+                       // maybe check using diff algo??
+                       // leaving this for now
                        && Enumerable.SequenceEqual(GetProperties(), definition.GetProperties());
             }
 
