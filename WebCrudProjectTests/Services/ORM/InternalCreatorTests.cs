@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WebCrudProject.Services.ORM.Attributes;
 using WebCrudProject.Services.ORM.Interfaces;
+using WebCrudProject.Services.ORM.Models;
 
 namespace WebCrudProject.Services.ORM.Tests
 {
@@ -8,75 +9,113 @@ namespace WebCrudProject.Services.ORM.Tests
     public sealed class internalCreatorTests
     {
         //Model
-        private InternalCreator _model;
+        private static InternalCreator _model;
 
         //Helpers
-        private readonly Type _type = typeof(TestClass);
+        private readonly Type _testClassType = typeof(TestClass);
+
 
         [TestInitialize]
-        public async Task Init()
+        public void Init() 
         {
             _model = new InternalCreator("data source=LAPTOP-BORIS;initial catalog=webcrudproject;persist security info=True;Integrated Security=SSPI;");
         }
 
-        [TestMethod()]
-        public void InternalCreatorTests1()
+        [TestMethod]
+        public void GetPropertiesTest()
         {
-            /// GetProperties
             // Act
-            var props = _model.GetProperties(_type);
+            var props = _model.GetProperties(_testClassType);
 
             // Assert
             Assert.AreEqual(13, props.Count());
         }
 
-        [TestMethod()]
-        public void InternalCreatorTests2()
+        [TestMethod]
+        public void GetTableClassAttributeTest()
         {
-            /// GetTableClass
             // Act
-            var tableClass = _model.GetTableClass(_type);
+            var tableClass = _model.GetTableClass(_testClassType);
 
             // Assert
             Assert.AreEqual("testClass", tableClass.TableName);
         }
 
-
         [TestMethod]
-        public async Task InternalCreatorTests3()
+        public async Task GetTableDefinitionTest()
         {
-            /// CreateTable, TableExist, GetTableDefinition
             // Arrange
-            var props = _model.GetProperties(_type);
-            var tableClass = _model.GetTableClass(_type);
+            var type = typeof(TableDefinition);
+            var props = _model.GetProperties(type);
+            var tableClass = _model.GetTableClass(type);
             var tableParams = Common.ConverToSQLTypes(props);
 
-            // Delete to make sure
-            await _model.DeleteTableAsync(tableClass.TableName);
+            var magicVersion = new TableDefinition 
+            {
+                Name = tableClass.TableName,
+                Type = type.Name,
+            };
+
+            Common.FillTableDefenition(magicVersion, tableParams);
 
             // Act
-            var created = await _model.CreateTableAsync(_type,tableClass.TableName, tableParams);
+            var dbVersion = await _model.GetTableDefinitionAsync(type);
+
+            // Assert
+            Assert.IsTrue(dbVersion.Equals(magicVersion));
+        }
+
+        [TestMethod]
+        public async Task CreateTableTest()
+        {
+            // Arrange
+            var props = _model.GetProperties(_testClassType);
+            var tableClass = _model.GetTableClass(_testClassType);
+            var tableParams = Common.ConverToSQLTypes(props);
+
+            // Act
+            var created = await _model.CreateTableAsync(_testClassType, tableClass.TableName, tableParams);
             var exists = await _model.TableExistsAsync(tableClass.TableName);
-            var defExists = await _model.GetTableDefinitionAsync(_type);
 
             // Assert
             Assert.IsTrue(created);
             Assert.IsTrue(exists);
-            Assert.IsNotNull(defExists);
         }
 
         [TestMethod]
-        public async Task InternalCreatorTests4()
+        public async Task CheckForTableDefinitionUpdateTest()
         {
-            // CheckForTableDefinitionUpdate
+            // Arrange
+            var type = typeof(DynamicClass);
+            var type2 = typeof(DynamicClass2);
 
+            var props = _model.GetProperties(type);
+            var props2 = _model.GetProperties(type2);
 
+            var tableClass = _model.GetTableClass(type);
+            var tableClass2 = _model.GetTableClass(type2);
+
+            var tableParams = Common.ConverToSQLTypes(props);
+            var tableParams2 = Common.ConverToSQLTypes(props2);
+
+            var created = await _model.CreateTableAsync(type, tableClass.TableName, tableParams);
+
+            var oldDef = await _model.GetTableDefinitionAsync(type);
+
+            Assert.IsTrue(created);
+
+            // Act
+            await _model.CheckForTableDefinitionUpdate(type, tableClass2, props2, tableParams2);
+
+            // Assert
+            Assert.IsTrue(oldDef.Equals(await _model.GetTableDefinitionAsync(type)));
+            Assert.IsTrue((await _model.GetTableDefinitionAsync(type)).PropertyCount > oldDef.PropertyCount);
         }
 
         [TestCleanup]
-        public void CleanUp()
+        public async Task CleanUp() 
         {
-            _model.DeleteTablesAsync().Wait();
+            await _model.DeleteTestTablesAsync();
         }
 
         [TableClass("tblDynamicClass")]
@@ -87,6 +126,14 @@ namespace WebCrudProject.Services.ORM.Tests
             public DateTime DateCreated { get; set; }
 
             //:)
+        }
+        [TableClass("tblDynamicClass")]
+        public sealed class DynamicClass2 : ISqlModel
+        {
+            public Guid Id { get; set; }
+            public DateTime LastUpdated { get; set; }
+            public DateTime DateCreated { get; set; }
+            public int Added { get; set; }
         }
 
         [TableClass("testClass")]

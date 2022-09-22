@@ -10,6 +10,7 @@ namespace WebCrudProject.Services.ORM.Models
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
         public int PropertyCount { get; set; }
         public string PropertyArray { get; set; } = string.Empty;
         public DateTime LastUpdated { get; set; }
@@ -23,8 +24,9 @@ namespace WebCrudProject.Services.ORM.Models
         {
             if (obj != null && obj is TableDefinition definition)
             {
-                return Name.Equals(definition.Name) &&
-                       PropertyCount == definition.PropertyCount
+                return Name == definition.Name &&
+                       PropertyCount == definition.PropertyCount &&
+                       Type == definition.Type
                        // maybe check using diff algo??
                        // leaving this for now
                        && Enumerable.SequenceEqual(GetProperties(), definition.GetProperties());

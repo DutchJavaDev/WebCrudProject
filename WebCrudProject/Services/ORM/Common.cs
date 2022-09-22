@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using WebCrudProject.Services.ORM.Models;
 
 namespace WebCrudProject.Services.ORM
 {
@@ -45,6 +46,17 @@ namespace WebCrudProject.Services.ORM
             return _type;
         }
 
+        public static void FillTableDefenition(TableDefinition magicVersion, IEnumerable<(string, string)> tableParams)
+        {
+            foreach (var tblp in tableParams)
+            {
+                magicVersion.PropertyArray
+                    += $"{EncodeProperties(tblp.Item1, tblp.Item2)}" +
+                    $"{(tblp == tableParams.Last() ? "" : ",")}";
+                magicVersion.PropertyCount++;
+            }
+        }
+
         public static string EncodeProperties(string name, string type)
         {
             return $"({name}:{type})";
@@ -54,7 +66,7 @@ namespace WebCrudProject.Services.ORM
         {
             return str.Split(",")
                 .Select(i => 
-                    i.Replace(":","")
+                    i.Replace(":"," ")
                     .Replace("(","")
                     .Replace(")","")
                 )

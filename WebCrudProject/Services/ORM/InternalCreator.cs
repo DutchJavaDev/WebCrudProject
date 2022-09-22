@@ -20,7 +20,7 @@ namespace WebCrudProject.Services.ORM
         private readonly Type TableClassAttribute = typeof(TableClassAttribute);
         private readonly Type TableDefinition = typeof(TableDefinition);
         private readonly IEnumerable<PropertyInfo> _tableDefinitionProperties;
-        private IEnumerable<TableDefinition> _cache = Enumerable.Empty<TableDefinition>();
+        private TableDefinition[] _cache = Enumerable.Empty<TableDefinition>().ToArray();
 
         public InternalCreator(string conectionString)
         {
@@ -37,8 +37,12 @@ namespace WebCrudProject.Services.ORM
             {
                 var tableParams = Common.ConverToSQLTypes(_tableDefinitionProperties);
 
-                await CreateTableAsync(TableDefinition, 
+                await CreateTableAsync(TableDefinition,
                     _tableDefinitionTable, tableParams);
+            }
+            else
+            {
+                //  Check for update
             }
 
             _cache = await GetTableDefinitionsAsync();
@@ -58,18 +62,20 @@ namespace WebCrudProject.Services.ORM
             }
         }
 
-        public async Task<IEnumerable<TableDefinition>> GetTableDefinitionsAsync()
+        public async Task<TableDefinition[]> GetTableDefinitionsAsync()
         {
-            using (var connection = CreateConnecton())
-                return (await connection
-                    .QueryAsync<TableDefinition>($"SELECT * FROM {_tableDefinitionTable}"))
-                    .ToArray();
+            using var connection = CreateConnecton();
+            _cache = (await connection
+                .QueryAsync<TableDefinition>($"SELECT * FROM {_tableDefinitionTable}"))
+                .ToArray();
+
+            return _cache;
         }
 
         public async Task<bool> TableExistsAsync(string tableName)
         {
 
-            if (_cache != null && _cache.Count() > 0)
+            if (_cache.Length > 0)
             {
                 var exists = _cache.Where(i => i.Name == tableName)
                     .FirstOrDefault() != null;
@@ -104,9 +110,12 @@ namespace WebCrudProject.Services.ORM
             var def = new TableDefinition
             {
                 Name = tableName,
+                Type = type.Name,
                 DateCreated = DateTime.Now,
                 LastUpdated = DateTime.Now
             };
+
+            Common.FillTableDefenition(def, tableParams);
 
             builder.Append($"CREATE TABLE {tableName} (");
 
@@ -115,11 +124,6 @@ namespace WebCrudProject.Services.ORM
                 // convert to params
                 builder.Append($"{tblp.Item1} {tblp.Item2} NULL" +
                     $"{(tblp == tableParams.Last() ? "" : ",")}");
-               
-                def.PropertyArray 
-                    += $"{Common.EncodeProperties(tblp.Item1,tblp.Item2)}" +
-                    $"{(tblp == tableParams.Last() ? "" : ",")}";
-                def.PropertyCount++;
             }
 
             builder.Append(") ");
@@ -133,7 +137,7 @@ namespace WebCrudProject.Services.ORM
 
                 var created = await TableExistsAsync(tableName); // Find different way to be faster
 
-                await InserTableDefinition(def, connection);
+                await InsertTableDefinition(def, connection);
 
                 _cache = await GetTableDefinitionsAsync();
 
@@ -141,45 +145,45 @@ namespace WebCrudProject.Services.ORM
             }
         }
 
-        public async Task DeleteTableAsync(string tableName)
+        private async Task DeleteTableAsync(string tableName)
         {
             try
             {
                 var query = @$"DROP TABLE {tableName}";
 
                 // Delete definition to!
+                var query2 = @$"DELETE FROM {_tableDefinitionTable} WHERE Name = @tableName";
 
                 using (var connection = CreateConnecton())
                 {
                     await connection.OpenAsync();
 
-                    await connection.ExecuteAsync(query, new { tableName });
+                    var _params = new { tableName };
+
+                    await connection.ExecuteAsync(query);
+                    await connection.ExecuteAsync(query2, _params);
                 }
+
+                _cache = await GetTableDefinitionsAsync();
             }
             catch (SqlException)
             {
             }
         }
 
-        public async Task DeleteTablesAsync()
+        public async Task DeleteTestTablesAsync()
         {
+
+            if (_cache.Length == 0) return;
             try
             {
-                var def = await GetTableDefinitionsAsync();
-
-                if(def.Count() == 0)
-                    return;
-
-                using (var connection = CreateConnecton())
+                foreach (var tableDef in _cache.
+                    Where(i => i.Name != _tableDefinitionTable))
                 {
-                    await connection.OpenAsync();
-
-                    foreach (var tableDef in def)
-                    {
-                        var query = @$"DROP TABLE {tableDef.Name}";
-                        await connection.ExecuteAsync(query, new { tableDef.Name });
-                    }
+                    await DeleteTableAsync(tableDef.Name);
                 }
+
+                _cache = await GetTableDefinitionsAsync();
             }
             catch (SqlException)
             {
@@ -188,52 +192,48 @@ namespace WebCrudProject.Services.ORM
 
         public async Task<TableDefinition> GetTableDefinitionAsync(Type type)
         {
-            // Check cache?
-            if (Attribute.IsDefined(type, TableClassAttribute) &&
-                Attribute.GetCustomAttribute(type, TableClassAttribute)
-                is TableClassAttribute tableClass)
-            {
-                var query = @$"SELECT * FROM {_tableDefinitionTable} WHERE Name = @Name";
+            TableDefinition definition;
 
-                var _params = new
-                {
-                    tableName = _tableDefinitionTable,
-                    Name = tableClass.TableName
-                };
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+            definition = _cache.FirstOrDefault(i => i.Type == type.Name);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
-                using (var connection = CreateConnecton())
-                {
-                    return await connection
-                        .QueryFirstOrDefaultAsync<TableDefinition>(query, _params);
-                }
-            }
-            else
+            if (definition != null)
             {
-                return null;
+                return definition;
             }
+
+            var query = @$"SELECT * FROM {_tableDefinitionTable} WHERE Type = @Type";
+
+            var _params = new
+            {
+                Type = type.Name
+            };
+
+            using (var connection = CreateConnecton())
+            {
+                definition = await connection
+                    .QueryFirstOrDefaultAsync<TableDefinition>(query, _params);
+            }
+
+            return definition;
         }
 
         public async Task CheckForTableDefinitionUpdate(Type type, 
             TableClassAttribute tableClass, 
             IEnumerable<PropertyInfo> props,
-            ICollection<(string, string)> tableParams)
+            IEnumerable<(string, string)> tableParams)
         {
             var dbDefinition = await GetTableDefinitionAsync(type);
 
             var newDefinition = new TableDefinition
             {
                 Name = tableClass.TableName,
+                Type = dbDefinition.Type,
+                Id = dbDefinition.Id,
             };
 
-            foreach (var tblp in tableParams)
-            {
-                // convert to params
-                newDefinition.PropertyArray 
-                    += $"{Common.EncodeProperties(tblp.Item1, tblp.Item2)}" +
-                    $"{(tblp == tableParams.Last() ? "" : ",")}";
-
-                newDefinition.PropertyCount++;
-            }
+            Common.FillTableDefenition(newDefinition, tableParams);
 
             if (!dbDefinition.Equals(newDefinition))
             {
@@ -242,32 +242,46 @@ namespace WebCrudProject.Services.ORM
 
                 var oldDef = Common.DecodeProperties(dbDefinition.PropertyArray);
                 var newDef = Common.DecodeProperties(newDefinition.PropertyArray);
-                var deleDef = oldDef.
+                var dropDef = oldDef.
                     Where(i => !newDef.Contains(i))
-                    .Select(i => $"DELETE COLUMN {i};").ToList();
+                    .Select(i => $"DROP COLUMN {i};").ToList();
                 var addDef = newDef.
                     Where(i => !oldDef.Contains(i))
-                    .Select(i => $"ADD COLUMN {i}").ToList();
+                    .Select(i => $"ADD {i}").ToList();
 
 
+                if (addDef.Any())
+                {
+                    var query = $"ALTER TABLE {tableClass.TableName} {addDef.ToSingleString()}";
+
+                    using (var connection = CreateConnecton())
+                    {
+                        await connection.OpenAsync();
+                        await connection.ExecuteAsync(query);
+                        await UpdateTableDefinition(newDefinition, connection);
+                    }
+                }
+
+                if (dropDef.Any())
+                {
+                    var query = $"ALTER TABLE {tableClass.TableName}" +
+                       $" {dropDef.ToSingleString()}";
+
+                    using (var connection = CreateConnecton())
+                    {
+                        await connection.OpenAsync();
+                        await connection.ExecuteAsync(query);
+                        await UpdateTableDefinition(newDefinition, connection);
+                    }
+                }
+
+                _cache = await GetTableDefinitionsAsync();
             }
         }
 
         // Check Dapper.Contrib for insterting, might fix my error?
-        private async Task InserTableDefinition(TableDefinition model, SqlConnection connection)
+        private async Task InsertTableDefinition(TableDefinition model, SqlConnection connection)
         {
-            foreach (var prop in _tableDefinitionProperties)
-            {
-                var variableName = prop.Name;
-                var variableType = Common.GetSQLServerType(prop.PropertyType);
-
-                var encoded = Common.EncodeProperties(variableName, variableType);
-
-                model.PropertyArray += $"{encoded}" +
-                    $"{(prop == _tableDefinitionProperties.Last() ? "" : ",")}";
-                model.PropertyCount++;
-            }
-
             var names = _tableDefinitionProperties.GetNames();
 
             var builder = new StringBuilder();
@@ -289,10 +303,29 @@ namespace WebCrudProject.Services.ORM
             await connection.ExecuteAsync(builder.ToString(), model);
         }
 
+        private async Task UpdateTableDefinition(TableDefinition model, SqlConnection connection)
+        {
+            var names = _tableDefinitionProperties.GetNames();
+
+            var builder = new StringBuilder();
+
+            model.LastUpdated = DateTime.Now;
+
+            builder.AppendLine($"UPDATE {_tableDefinitionTable}");
+            builder.Append("SET ");
+            foreach (var name in names.Where(i => i != "Id"))
+            {
+                builder.AppendLine($"{name} = @{name}{(name == names.Last() ? "" : ",")}");
+            }
+            builder.AppendLine("WHERE Id = @Id");
+            //// Bugg with date time
+            await connection.ExecuteAsync(builder.ToString(), model);
+        }
+
         public IEnumerable<PropertyInfo> GetProperties(Type type)
         {
             return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                                     .Where(i => ValidProperty(i)).ToArray();
+                                     .Where(i => ValidProperty(i));
         }
 
         private static bool ValidProperty(PropertyInfo info)

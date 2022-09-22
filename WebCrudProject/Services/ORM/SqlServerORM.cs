@@ -5,7 +5,7 @@ namespace WebCrudProject.Services.ORM
 {
     public sealed class SqlServerORM : IORM
     {
-        private InternalCreator internalCommands;
+        private InternalCreator internalService;
         public string ConnectionString { get; private set; } = string.Empty;
 
         private readonly Type TableClassAttribute = typeof(TableClassAttribute);
@@ -25,7 +25,7 @@ namespace WebCrudProject.Services.ORM
 
             _typeCache = models.ToArray();
 
-            internalCommands = new InternalCreator(ConnectionString);
+            internalService = new InternalCreator(ConnectionString);
 
             await BuildTableDefinitions();
         }
@@ -45,17 +45,18 @@ namespace WebCrudProject.Services.ORM
                 Attribute.GetCustomAttribute(type, TableClassAttribute) 
                 is TableClassAttribute tableClass)
             {
-                var props = internalCommands.GetProperties(type);
+                // This can be moved to into internalService instead of here
+                var props = internalService.GetProperties(type);
                 var tableParams = Common.ConverToSQLTypes(props)
                     .ToArray();
 
-                if (!await internalCommands.TableExistsAsync(tableClass.TableName))
+                if (!await internalService.TableExistsAsync(tableClass.TableName))
                 {
-                    await internalCommands.CreateTableAsync(type, tableClass.TableName, tableParams);
+                    await internalService.CreateTableAsync(type, tableClass.TableName, tableParams);
                 }
                 else
                 {
-                    await internalCommands.CheckForTableDefinitionUpdate(type, tableClass, props, tableParams);
+                    await internalService.CheckForTableDefinitionUpdate(type, tableClass, props, tableParams);
                 }
             }  
             else
