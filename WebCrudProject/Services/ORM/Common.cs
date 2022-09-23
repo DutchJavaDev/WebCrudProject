@@ -34,7 +34,7 @@ namespace WebCrudProject.Services.ORM
             return list;
         }
 
-        public static string GetSQLServerType(Type type)
+        private static string GetSQLServerType(Type type)
         {
             var _type = SQLServerTypes[type];
 
@@ -57,7 +57,7 @@ namespace WebCrudProject.Services.ORM
             }
         }
 
-        public static string EncodeProperties(string name, string type)
+        private static string EncodeProperties(string name, string type)
         {
             return $"[{name}:{type}]";
         }

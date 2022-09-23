@@ -67,9 +67,9 @@ namespace WebCrudProject.Services.ORM.Models.Tests
     [Table("tblUser")]
     public class User : ISqlModel 
     {
+        public int Id { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
-        public int Id { get;  set; }
         public DateTime LastUpdated { get; set; }
         public DateTime DateCreated { get; set; }
         public double dDouble { get; set; }
