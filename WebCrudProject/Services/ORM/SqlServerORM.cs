@@ -1,5 +1,6 @@
-﻿using WebCrudProject.Services.ORM.Attributes;
+﻿using Dapper.Contrib.Extensions;
 using WebCrudProject.Services.ORM.Interfaces;
+using WebCrudProject.Services.ORM.Models;
 
 namespace WebCrudProject.Services.ORM
 {
@@ -8,22 +9,22 @@ namespace WebCrudProject.Services.ORM
         private InternalCreator internalService;
         public string ConnectionString { get; private set; } = string.Empty;
 
-        private readonly Type TableClassAttribute = typeof(TableClassAttribute);
+        private readonly Type TableClassAttribute = typeof(TableAttribute);
 
-        private Type[] _typeCache;
+        private IEnumerable<Type> _typeCache = Enumerable.Empty<Type>();
 
         /// <summary>
         /// This assumes the db has already being created
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="connectionString"></param>
-        /// <param name="models"></param>
+        /// <param name="objects"></param>
         /// <returns></returns>
-        public async Task Init(string connectionString, ICollection<Type> models)
+        public async Task Init(string connectionString, IEnumerable<Type> objects)
         {
             ConnectionString = connectionString;
 
-            _typeCache = models.ToArray();
+            _typeCache = objects;
 
             internalService = new InternalCreator(ConnectionString);
 
@@ -34,7 +35,7 @@ namespace WebCrudProject.Services.ORM
         =>  await Task.Run(() => 
             {
                 _typeCache.AsParallel()
-                .WithDegreeOfParallelism(5)
+                .WithDegreeOfParallelism(10)
                 .ForAll(async i => await BuildTable(i));
             }).ConfigureAwait(false);
         
@@ -43,16 +44,16 @@ namespace WebCrudProject.Services.ORM
         {
             if (Attribute.IsDefined(type, TableClassAttribute) &&
                 Attribute.GetCustomAttribute(type, TableClassAttribute) 
-                is TableClassAttribute tableClass)
+                is TableAttribute tableClass)
             {
-                // This can be moved to into internalService instead of here
+                // This can be moved to into internalService instead of here?
                 var props = internalService.GetProperties(type);
                 var tableParams = Common.ConverToSQLTypes(props)
                     .ToArray();
 
-                if (!await internalService.TableExistsAsync(tableClass.TableName))
+                if (!await internalService.TableExistsAsync(tableClass.Name))
                 {
-                    await internalService.CreateTableAsync(type, tableClass.TableName, tableParams);
+                    await internalService.CreateTableAsync(type, tableClass.Name, tableParams);
                 }
                 else
                 {
@@ -64,6 +65,11 @@ namespace WebCrudProject.Services.ORM
                 // Error or use object name or fuck you?
                 // Yep still fuck you for now :)
             }
+        }
+
+        public IObjectContext GetObjectContext()
+        {
+            return new BaseObjectContext(ConnectionString);
         }
     }
 }

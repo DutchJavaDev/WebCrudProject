@@ -1,5 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using WebCrudProject.Services.ORM.Attributes;
+﻿using Dapper.Contrib.Extensions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WebCrudProject.Services.ORM.Interfaces;
 using WebCrudProject.Services.ORM.Models;
 
@@ -38,10 +38,10 @@ namespace WebCrudProject.Services.ORM.Tests
         public void GetTableClassAttributeTest()
         {
             // Act
-            var tableClass = _model.GetTableClass(_testClassType);
+            var tableClass = _model.GetTableAttribute(_testClassType);
 
             // Assert
-            Assert.AreEqual("testClass", tableClass.TableName);
+            Assert.AreEqual("testClass", tableClass.Name);
         }
 
         [TestMethod]
@@ -50,12 +50,12 @@ namespace WebCrudProject.Services.ORM.Tests
             // Arrange
             var type = typeof(TableDefinition);
             var props = _model.GetProperties(type);
-            var tableClass = _model.GetTableClass(type);
+            var tableClass = _model.GetTableAttribute(type);
             var tableParams = Common.ConverToSQLTypes(props);
 
             var magicVersion = new TableDefinition 
             {
-                Name = tableClass.TableName,
+                Name = tableClass.Name,
                 Type = type.Name,
             };
 
@@ -73,12 +73,12 @@ namespace WebCrudProject.Services.ORM.Tests
         {
             // Arrange
             var props = _model.GetProperties(_testClassType);
-            var tableClass = _model.GetTableClass(_testClassType);
+            var tableClass = _model.GetTableAttribute(_testClassType);
             var tableParams = Common.ConverToSQLTypes(props);
 
             // Act
-            var created = await _model.CreateTableAsync(_testClassType, tableClass.TableName, tableParams);
-            var exists = await _model.TableExistsAsync(tableClass.TableName);
+            var created = await _model.CreateTableAsync(_testClassType, tableClass.Name, tableParams);
+            var exists = await _model.TableExistsAsync(tableClass.Name);
 
             // Assert
             Assert.IsTrue(created);
@@ -95,13 +95,13 @@ namespace WebCrudProject.Services.ORM.Tests
             var props = _model.GetProperties(type);
             var props2 = _model.GetProperties(type2);
 
-            var tableClass = _model.GetTableClass(type);
-            var tableClass2 = _model.GetTableClass(type2);
+            var tableClass = _model.GetTableAttribute(type);
+            var tableClass2 = _model.GetTableAttribute(type2);
 
             var tableParams = Common.ConverToSQLTypes(props);
             var tableParams2 = Common.ConverToSQLTypes(props2);
 
-            var created = await _model.CreateTableAsync(type, tableClass.TableName, tableParams);
+            var created = await _model.CreateTableAsync(type, tableClass.Name, tableParams);
 
             var oldDef = await _model.GetTableDefinitionAsync(type);
 
@@ -121,7 +121,7 @@ namespace WebCrudProject.Services.ORM.Tests
             await _model.DeleteTestTablesAsync();
         }
 
-        [TableClass("tblDynamicClass")]
+        [Table("tblDynamicClass")]
         public sealed class DynamicClass : ISqlModel
         {
             public int Id { get; set; }
@@ -130,7 +130,7 @@ namespace WebCrudProject.Services.ORM.Tests
 
             //:)
         }
-        [TableClass("tblDynamicClass")]
+        [Table("tblDynamicClass")]
         public sealed class DynamicClass2 : ISqlModel
         {
             public int Id { get; set; }
@@ -142,7 +142,7 @@ namespace WebCrudProject.Services.ORM.Tests
             public double GSGD { get; set; }
         }
 
-        [TableClass("testClass")]
+        [Table("testClass")]
         public sealed class TestClass : ISqlModel
         {
             // This are the only supported tyes

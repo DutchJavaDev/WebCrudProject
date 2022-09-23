@@ -1,11 +1,11 @@
-﻿using WebCrudProject.Services.ORM.Attributes;
+﻿using Dapper.Contrib.Extensions;
 using WebCrudProject.Services.ORM.Interfaces;
 
 namespace WebCrudProject.Services.ORM.Models
 {
     // Store its self in the same table that way it can upate its self if we 
     // update it
-    [TableClass("tableDefinition")]
+    [Table("tableDefinition")]
     public class TableDefinition : ISqlModel
     {
         public int Id { get; set; }

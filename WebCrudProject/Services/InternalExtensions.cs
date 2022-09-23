@@ -8,7 +8,7 @@ namespace WebCrudProject.Services
         public static string[] GetNames(this IEnumerable<PropertyInfo> properties)
             => properties.Where(i => i.Name != "Id").Select(i => i.Name).ToArray();
 
-        public static string ToSingleString(this List<string> strings, string seperator = ",")
+        public static string ToSingleString(this IEnumerable<string> strings, string seperator = ",")
         {
             var builder = new StringBuilder();
 

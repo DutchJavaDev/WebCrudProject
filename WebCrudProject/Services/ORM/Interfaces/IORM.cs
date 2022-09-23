@@ -3,6 +3,8 @@
     public interface IORM
     {
         string ConnectionString { get; }
-        Task Init(string connectionString, ICollection<Type> models);
+        Task Init(string connectionString, IEnumerable<Type> objects);
+
+        IObjectContext GetObjectContext();
     }
 }

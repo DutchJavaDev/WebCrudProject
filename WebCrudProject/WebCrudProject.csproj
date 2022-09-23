@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Folder Include="Auth\Models\" />
+    <Folder Include="Services\ORM\Attributes\" />
     <Folder Include="wwwroot\files\" />
   </ItemGroup>
 

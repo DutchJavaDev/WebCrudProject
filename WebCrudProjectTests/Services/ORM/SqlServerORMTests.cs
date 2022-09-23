@@ -1,14 +1,13 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using WebCrudProject.Services.ORM;
 using WebCrudProject.Services.ORM.Interfaces;
-using WebCrudProject.Services.ORM.Attributes;
+using Dapper.Contrib.Extensions;
 
 namespace WebCrudProject.Services.ORM.Tests
 {
     [TestClass()]
     public sealed class SqlServerORMTests
     {
-        private SqlServerORM _model;
+        private IORM _model;
         private readonly string ConnectionStrng = @"data source=LAPTOP-BORIS;initial catalog=webcrudproject;persist security info=True;Integrated Security=SSPI;";
 
         [TestInitialize]
@@ -18,24 +17,26 @@ namespace WebCrudProject.Services.ORM.Tests
         }
 
         [TestMethod()]
-        public async Task InitTest()
+        public async Task ObjectContextTest()
         {
             // Arrange
-            var models = new Type[] 
+            var objects = new Type[] 
             { 
                 typeof(A),
                 typeof(B),
                 typeof(C),
             };
 
-            await _model.Init(ConnectionStrng, models);
+            // Act
+            await _model.Init(ConnectionStrng, objects);
 
-            Assert.IsTrue(true);
+            // Assert
+            Assert.IsNotNull(_model.GetObjectContext());
         }
 
     }
 
-    [TableClass("tblA")]
+    [Table("tblA")]
     public sealed class A : ISqlModel
     {
         public int Id { get; set; }
@@ -52,7 +53,7 @@ namespace WebCrudProject.Services.ORM.Tests
         public DateTime LastUpdated { get; set; }
         public DateTime DateCreated { get; set; }
     }
-    [TableClass("tblB")]
+    [Table("tblB")]
     public sealed class B : ISqlModel
     {
         public int Id { get; set; }
@@ -61,15 +62,17 @@ namespace WebCrudProject.Services.ORM.Tests
         public decimal Decimal { get; set; }
         public DateTime DateTime { get; set; }
         public bool Bool { get; set; }
+        public bool Bool2 { get; set; }
         public float Float { get; set; }
         public double dDouble { get; set; }
         public Guid Guid { get; set; }
         public byte Byte { get; set; }
         public short Schort { get; set; }
+        public bool Bool45 { get; set; }
         public DateTime LastUpdated { get; set; }
         public DateTime DateCreated { get; set; }
     }
-    [TableClass("tblC")]
+    [Table("tblC")]
     public sealed class C : ISqlModel
     {
         public int Id { get; set; }

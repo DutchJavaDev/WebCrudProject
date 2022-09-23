@@ -1,9 +1,9 @@
 ﻿using Dapper;
+using Dapper.Contrib.Extensions;
 using System.Data.SqlClient;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
-using WebCrudProject.Services.ORM.Attributes;
 using WebCrudProject.Services.ORM.Models;
 
 [assembly: InternalsVisibleTo("WebCrudProjectTests")]
@@ -17,8 +17,9 @@ namespace WebCrudProject.Services.ORM
     {
         private readonly string _connectionString;
         private readonly string _tableDefinitionTable;
-        private readonly Type TableClassAttribute = typeof(TableClassAttribute);
+        private readonly Type TableClassAttribute = typeof(TableAttribute);
         private readonly Type TableDefinition = typeof(TableDefinition);
+        private readonly TableAttribute _tableAttribute;
         private readonly IEnumerable<PropertyInfo> _tableDefinitionProperties;
         private TableDefinition[] _cache = Enumerable.Empty<TableDefinition>().ToArray();
 
@@ -26,7 +27,8 @@ namespace WebCrudProject.Services.ORM
         {
             _connectionString = conectionString;
             _tableDefinitionProperties = GetProperties(TableDefinition);
-            _tableDefinitionTable = GetTableClass(TableDefinition).TableName;
+            _tableAttribute = GetTableAttribute(TableDefinition);
+            _tableDefinitionTable = _tableAttribute.Name;
             EnsureDefaultDefinitions().Wait();
         }
 
@@ -42,17 +44,19 @@ namespace WebCrudProject.Services.ORM
             }
             else
             {
-                //  Check for update
+                var tableParams = Common.ConverToSQLTypes(_tableDefinitionProperties);
+
+                await CheckForTableDefinitionUpdate(TableDefinition, _tableAttribute, tableParams);
             }
 
             _cache = await GetTableDefinitionsAsync();
         }
 
-        public TableClassAttribute GetTableClass(Type type)
+        public TableAttribute GetTableAttribute(Type type)
         {
             if (Attribute.IsDefined(type, TableClassAttribute) &&
                 Attribute.GetCustomAttribute(type, TableClassAttribute) 
-                is TableClassAttribute _tableClassAttribute)
+                is TableAttribute _tableClassAttribute)
             {
                 return _tableClassAttribute;
             }
@@ -220,14 +224,14 @@ namespace WebCrudProject.Services.ORM
         }
 
         public async Task CheckForTableDefinitionUpdate(Type type, 
-            TableClassAttribute tableClass, 
+            TableAttribute tableClass, 
             IEnumerable<(string, string)> tableParams)
         {
             var dbDefinition = await GetTableDefinitionAsync(type);
 
             var newDefinition = new TableDefinition
             {
-                Name = tableClass.TableName,
+                Name = tableClass.Name,
                 Type = dbDefinition.Type,
                 Id = dbDefinition.Id,
                 DateCreated = dbDefinition.DateCreated,
@@ -243,16 +247,15 @@ namespace WebCrudProject.Services.ORM
                 var oldDef = Common.DecodeProperties(dbDefinition.PropertyArray);
                 var newDef = Common.DecodeProperties(newDefinition.PropertyArray);
                 var dropDef = oldDef.
-                    Where(i => !newDef.Contains(i))
-                    .Select(i => $"ALTER TABLE {tableClass.TableName} DROP COLUMN {i};").ToList();
+                    Where(i => !newDef.Contains(i));
+
                 var addDef = newDef.
-                    Where(i => !oldDef.Contains(i))
-                    .Select(i => i).ToList();
+                    Where(i => !oldDef.Contains(i));
 
 
                 if (addDef.Any())
                 {
-                    var query = $"ALTER TABLE {tableClass.TableName} ADD {addDef.ToSingleString()}";
+                    var query = $"ALTER TABLE {tableClass.Name} ADD {addDef.ToSingleString()}";
 
                     using (var connection = CreateConnecton())
                     {
@@ -264,16 +267,7 @@ namespace WebCrudProject.Services.ORM
 
                 if (dropDef.Any())
                 {
-                    // Yup this going to buggy
-                    //var query = $"ALTER TABLE {tableClass.TableName}" +
-                    //   $" {dropDef.ToSingleString()}";
-
-                    //using (var connection = CreateConnecton())
-                    //{
-                    //    await connection.OpenAsync();
-                    //    await connection.ExecuteAsync(query);
-                    //    await UpdateTableDefinition(newDefinition, connection);
-                    //}
+                    // TODOD
                 }
 
                 _cache = await GetTableDefinitionsAsync();
