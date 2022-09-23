@@ -122,7 +122,9 @@ namespace WebCrudProject.Services.ORM
             foreach (var tblp in tableParams)
             {
                 // convert to params
-                builder.Append($"{tblp.Item1} {tblp.Item2} NULL" +
+                builder.Append($"{tblp.Item1} {tblp.Item2} " +
+                    $"{(tblp.Item1 == "Id" ? "IDENTITY(1,1)" : "")}"+
+                    $" NOT NULL" +
                     $"{(tblp == tableParams.Last() ? "" : ",")}");
             }
 
@@ -134,8 +136,6 @@ namespace WebCrudProject.Services.ORM
                 await connection.OpenAsync();
 
                 await connection.ExecuteScalarAsync(builder.ToString());
-
-                var created = await TableExistsAsync(tableName); // Find different way to be faster
 
                 await InsertTableDefinition(def, connection);
 
@@ -221,7 +221,6 @@ namespace WebCrudProject.Services.ORM
 
         public async Task CheckForTableDefinitionUpdate(Type type, 
             TableClassAttribute tableClass, 
-            IEnumerable<PropertyInfo> props,
             IEnumerable<(string, string)> tableParams)
         {
             var dbDefinition = await GetTableDefinitionAsync(type);
@@ -231,6 +230,7 @@ namespace WebCrudProject.Services.ORM
                 Name = tableClass.TableName,
                 Type = dbDefinition.Type,
                 Id = dbDefinition.Id,
+                DateCreated = dbDefinition.DateCreated,
             };
 
             Common.FillTableDefenition(newDefinition, tableParams);
@@ -244,15 +244,15 @@ namespace WebCrudProject.Services.ORM
                 var newDef = Common.DecodeProperties(newDefinition.PropertyArray);
                 var dropDef = oldDef.
                     Where(i => !newDef.Contains(i))
-                    .Select(i => $"DROP COLUMN {i};").ToList();
+                    .Select(i => $"ALTER TABLE {tableClass.TableName} DROP COLUMN {i};").ToList();
                 var addDef = newDef.
                     Where(i => !oldDef.Contains(i))
-                    .Select(i => $"ADD {i}").ToList();
+                    .Select(i => i).ToList();
 
 
                 if (addDef.Any())
                 {
-                    var query = $"ALTER TABLE {tableClass.TableName} {addDef.ToSingleString()}";
+                    var query = $"ALTER TABLE {tableClass.TableName} ADD {addDef.ToSingleString()}";
 
                     using (var connection = CreateConnecton())
                     {
@@ -264,15 +264,16 @@ namespace WebCrudProject.Services.ORM
 
                 if (dropDef.Any())
                 {
-                    var query = $"ALTER TABLE {tableClass.TableName}" +
-                       $" {dropDef.ToSingleString()}";
+                    // Yup this going to buggy
+                    //var query = $"ALTER TABLE {tableClass.TableName}" +
+                    //   $" {dropDef.ToSingleString()}";
 
-                    using (var connection = CreateConnecton())
-                    {
-                        await connection.OpenAsync();
-                        await connection.ExecuteAsync(query);
-                        await UpdateTableDefinition(newDefinition, connection);
-                    }
+                    //using (var connection = CreateConnecton())
+                    //{
+                    //    await connection.OpenAsync();
+                    //    await connection.ExecuteAsync(query);
+                    //    await UpdateTableDefinition(newDefinition, connection);
+                    //}
                 }
 
                 _cache = await GetTableDefinitionsAsync();
@@ -312,13 +313,13 @@ namespace WebCrudProject.Services.ORM
             model.LastUpdated = DateTime.Now;
 
             builder.AppendLine($"UPDATE {_tableDefinitionTable}");
-            builder.Append("SET ");
+            builder.Append(" SET ");
             foreach (var name in names.Where(i => i != "Id"))
             {
                 builder.AppendLine($"{name} = @{name}{(name == names.Last() ? "" : ",")}");
             }
-            builder.AppendLine("WHERE Id = @Id");
-            //// Bugg with date time
+            builder.AppendLine(" WHERE Id = @Id");
+
             await connection.ExecuteAsync(builder.ToString(), model);
         }
 

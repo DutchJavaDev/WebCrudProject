@@ -59,7 +59,7 @@ namespace WebCrudProject.Services.ORM
 
         public static string EncodeProperties(string name, string type)
         {
-            return $"({name}:{type})";
+            return $"[{name}:{type}]";
         }
 
         public static string[] DecodeProperties(string str)
@@ -67,8 +67,8 @@ namespace WebCrudProject.Services.ORM
             return str.Split(",")
                 .Select(i => 
                     i.Replace(":"," ")
-                    .Replace("(","")
-                    .Replace(")","")
+                    .Replace("[","")
+                    .Replace("]","")
                 )
                 .ToArray();
         }

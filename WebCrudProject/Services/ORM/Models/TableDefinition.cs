@@ -8,7 +8,7 @@ namespace WebCrudProject.Services.ORM.Models
     [TableClass("tableDefinition")]
     public class TableDefinition : ISqlModel
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Type { get; set; } = string.Empty;
         public int PropertyCount { get; set; }
@@ -18,7 +18,7 @@ namespace WebCrudProject.Services.ORM.Models
 
 
         // returns array of (a,b),(a,b)
-        private string[] GetProperties() => PropertyArray.Split(",");
+        //private string[] GetProperties() => PropertyArray.Split(",");
 
         public override bool Equals(object? obj)
         {
@@ -27,9 +27,9 @@ namespace WebCrudProject.Services.ORM.Models
                 return Name == definition.Name &&
                        PropertyCount == definition.PropertyCount &&
                        Type == definition.Type
-                       // maybe check using diff algo??
-                       // leaving this for now
-                       && Enumerable.SequenceEqual(GetProperties(), definition.GetProperties());
+                      // maybe check using diff algo??
+                      // leaving this for now
+                      ;// && Enumerable.SequenceEqual(GetProperties(), definition.GetProperties());
             }
 
             return false;

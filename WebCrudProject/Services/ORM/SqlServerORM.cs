@@ -56,7 +56,7 @@ namespace WebCrudProject.Services.ORM
                 }
                 else
                 {
-                    await internalService.CheckForTableDefinitionUpdate(type, tableClass, props, tableParams);
+                    await internalService.CheckForTableDefinitionUpdate(type, tableClass, tableParams);
                 }
             }  
             else

@@ -38,7 +38,7 @@ namespace WebCrudProject.Services.ORM.Tests
     [TableClass("tblA")]
     public sealed class A : ISqlModel
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public int Int { get; set; }
         public string String { get; set; }
         public decimal Decimal { get; set; }
@@ -55,7 +55,7 @@ namespace WebCrudProject.Services.ORM.Tests
     [TableClass("tblB")]
     public sealed class B : ISqlModel
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public int Int { get; set; }
         public string String { get; set; }
         public decimal Decimal { get; set; }
@@ -72,7 +72,7 @@ namespace WebCrudProject.Services.ORM.Tests
     [TableClass("tblC")]
     public sealed class C : ISqlModel
     {
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public int Int { get; set; }
         public string String { get; set; }
         public decimal Decimal { get; set; }

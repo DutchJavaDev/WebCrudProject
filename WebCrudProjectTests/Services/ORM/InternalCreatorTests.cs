@@ -105,10 +105,10 @@ namespace WebCrudProject.Services.ORM.Tests
             Assert.IsTrue(created);
 
             // Act
-            await _model.CheckForTableDefinitionUpdate(type, tableClass2, props2, tableParams2);
+            await _model.CheckForTableDefinitionUpdate(type, tableClass2, tableParams2);
 
             // Assert
-            Assert.IsTrue(oldDef.Equals(await _model.GetTableDefinitionAsync(type)));
+            Assert.IsFalse(oldDef.Equals(await _model.GetTableDefinitionAsync(type)));
             Assert.IsTrue((await _model.GetTableDefinitionAsync(type)).PropertyCount > oldDef.PropertyCount);
         }
 
@@ -121,7 +121,7 @@ namespace WebCrudProject.Services.ORM.Tests
         [TableClass("tblDynamicClass")]
         public sealed class DynamicClass : ISqlModel
         {
-            public Guid Id { get; set; }
+            public int Id { get; set; }
             public DateTime LastUpdated { get; set; }
             public DateTime DateCreated { get; set; }
 
@@ -130,10 +130,13 @@ namespace WebCrudProject.Services.ORM.Tests
         [TableClass("tblDynamicClass")]
         public sealed class DynamicClass2 : ISqlModel
         {
-            public Guid Id { get; set; }
+            public int Id { get; set; }
             public DateTime LastUpdated { get; set; }
             public DateTime DateCreated { get; set; }
             public int Added { get; set; }
+            public string Dick { get; set; }
+            public int Added2 { get;set; }
+            public double GSGD { get; set; }
         }
 
         [TableClass("testClass")]
@@ -141,7 +144,7 @@ namespace WebCrudProject.Services.ORM.Tests
         {
             // This are the only supported tyes
             // New ones will be added here one way or another or not :)
-            public Guid Id { get; set; }
+            public int Id { get; set; }
             public int Int { get; set; }
             public string String { get; set; }
             public decimal Decimal { get; set; }
