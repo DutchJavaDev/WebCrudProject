@@ -5,6 +5,9 @@ using WebCrudProject.Services.ORM.Models;
 
 namespace WebCrudProject.Services.ORM.Tests
 {
+    /// <summary>
+    /// // This needs to be done over since this is just a mvp, base code is close to a certian food from italy 
+    /// </summary>
     [TestClass]
     public sealed class internalCreatorTests
     {
