@@ -19,31 +19,6 @@ namespace WebCrudProject.Auth
         /// <returns></returns>
         public static async Task CheckSignIn(HttpContext context, Func<Task> next)
         {
-            if (!context.User.Identity.IsAuthenticated && !context.Request.Path.Value.Contains("Auth"))
-            {
-                var hasCookie = context.Request.Cookies.TryGetValue(SignIngCookie, out var userAuth);
-
-                if (hasCookie)
-                {
-                    var model = JsonConvert.DeserializeObject<AuthenticationModel>(userAuth);
-                    var claims = new[] {
-                    new Claim(ClaimTypes.Email, model.Email),
-                    new Claim(ClaimTypes.NameIdentifier, model.ReferenceId)
-                };
-                    ClaimsIdentity identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    ClaimsPrincipal principal = new ClaimsPrincipal(identity);
-                    context.User = principal;
-                }
-                else
-                {
-                    var path = context.Request.Path.ToString();
-
-                    context.Response.Redirect($"/Auth/Index?rtnUrl={path}");
-                }
-
-            }
-
-            await next();
         }
     }
 }

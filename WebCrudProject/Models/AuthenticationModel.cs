@@ -1,9 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Dapper.Contrib.Extensions;
+using System.ComponentModel.DataAnnotations;
+using WebCrudProject.Services.ORM.Interfaces;
 
 namespace WebCrudProject.Models
 {
-    public class AuthenticationModel
+    [Table("tblAuthenticationModel")]
+    public class AuthenticationModel : ISqlModel
     {
+        public int Id { get; set; }
         [Required]
         [EmailAddress]
         [DataType(DataType.EmailAddress)]
@@ -13,8 +17,8 @@ namespace WebCrudProject.Models
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
-        public string ReferenceId { get; set; }
-
         public string ReturnUrl { get; set; }
+        public DateTime LastUpdated { get; set; }
+        public DateTime DateCreated { get; set; }
     }
 }

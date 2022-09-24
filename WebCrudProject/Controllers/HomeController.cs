@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using WebCrudProject.Models;
+using WebCrudProject.Services.ORM.Interfaces;
 
 namespace WebCrudProject.Controllers
 {
@@ -14,9 +15,22 @@ namespace WebCrudProject.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index([FromServices] IObjectContext context)
         {
-            return View();
+            var model = new AuthenticationModel 
+            {
+                Email = "Boris",
+                Password = "KWende",
+                ReturnUrl = "asdasdsa",
+                DateCreated = DateTime.Now,
+                LastUpdated = DateTime.Now
+            };
+
+            await context.InsertAsync(model);
+
+            var db = await context.GetListAsync<AuthenticationModel>();
+
+            return View(db.Last());
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

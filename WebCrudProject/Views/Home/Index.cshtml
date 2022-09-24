@@ -1,5 +1,5 @@
 ﻿@using System.Security.Claims
-
+@model AuthenticationModel
 @{
     ViewData["Title"] = "Home Page";
 }
@@ -10,21 +10,23 @@
 
     @if (Model != null)
     {
+        
            <div>
        <p>documents</p>
 
-       @foreach (var doc in Model)
+       @*@foreach (var doc in Model)
        {
            <div class="border-2">
                <p>@doc.DocumentTitle</p>
                     @Html.ActionLink("Edit","Update","Document", new { number = doc.DocumentNumber }, new {});
                     @Html.ActionLink("Delete", "DeleteDocument", "Document", new  { number = doc.DocumentNumber }, new{})
            </div>
-       }
+       }*@
        </div>
     }
 
     &nbsp;
+    <h1>@Model.DateCreated</h1>
     <div class="w-50 text-center bg-info">
         <form asp-controller="Upload" asp-action="Files" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
