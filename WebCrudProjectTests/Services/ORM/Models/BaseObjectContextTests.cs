@@ -10,14 +10,16 @@ namespace WebCrudProject.Services.ORM.Models.Tests
         private static string _connectionString =
             "data source=LAPTOP-BORIS;initial catalog=webcrudproject;persist security info=True;Integrated Security=SSPI;";
 
-        IObjectContext _model;
-        IORM _base;
+        private IORM _base;
+        
+        // Model
+        private IObjectContext _model;
 
         [TestInitialize]
-        public void Init()
+        public async Task Init()
         {
             _base = new SqlServerORM();
-            _base.InitAsync(_connectionString, new Type[] { typeof(User) });
+            await _base.InitAsync(_connectionString, new Type[] { typeof(User), typeof(DynamicClass) });
             _model = _base.GetObjectContext();
         }
 
@@ -132,6 +134,16 @@ namespace WebCrudProject.Services.ORM.Models.Tests
                     B = true
                 }).ToArray();
         }
+
+        private DynamicClass[] CreateDynamicClas(int amount = 1)
+        {
+            return Enumerable.Range(0, amount)
+                .Select(x => new DynamicClass
+                {
+                    DateCreated = DateTime.Now,
+                    LastUpdated = DateTime.Now,
+                }).ToArray();
+        }
     }
 
     [Table("tblUser")]
@@ -154,5 +166,26 @@ namespace WebCrudProject.Services.ORM.Models.Tests
 
             return false;
         }
+    }
+
+    [Table("tblDynamicClass")]
+    public sealed class DynamicClass : ISqlModel
+    {
+        public int Id { get; set; }
+        public DateTime LastUpdated { get; set; }
+        public DateTime DateCreated { get; set; }
+
+        //:)
+    }
+    [Table("tblDynamicClass")]
+    public sealed class DynamicClass2 : ISqlModel
+    {
+        public int Id { get; set; }
+        public DateTime LastUpdated { get; set; }
+        public DateTime DateCreated { get; set; }
+        public int Added { get; set; }
+        public string Dick { get; set; }
+        public int Added2 { get; set; }
+        public double GSGD { get; set; }
     }
 }

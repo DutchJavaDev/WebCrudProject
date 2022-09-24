@@ -177,23 +177,24 @@ namespace WebCrudProject.Services.ORM
 
         public async Task ClearTable(Type type)
         {
-            var exists = _cache.Where(i => i.Type == type.Name).First();
-
-            if (exists != null)
+            if (_cache.Any())
             {
-                var query = $"TRUNCATE TABLE {exists.Name}";
-                using (var connection = CreateConnecton())
+                var exists = _cache.Where(i => i.Type == type.Name);
+
+                if (exists.Any())
                 {
-                    await connection.ExecuteAsync(query);
+                    var query = $"TRUNCATE TABLE {exists.First().Name}";
+                    using (var connection = CreateConnecton())
+                    {
+                        await connection.ExecuteAsync(query);
+                    }
                 }
-            }
+            }    
         }
 
         public async Task DeleteTestTablesAsync()
         {
-
-            if (_cache.Length == 0) return;
-            try
+            if (_cache.Any())
             {
                 foreach (var tableDef in _cache.
                     Where(i => i.Name != _tableDefinitionTable))
@@ -202,9 +203,6 @@ namespace WebCrudProject.Services.ORM
                 }
 
                 _cache = await GetTableDefinitionsAsync();
-            }
-            catch (SqlException)
-            {
             }
         }
 
@@ -260,8 +258,10 @@ namespace WebCrudProject.Services.ORM
 
                 var oldDef = Common.DecodeProperties(dbDefinition.PropertyArray);
                 var newDef = Common.DecodeProperties(newDefinition.PropertyArray);
+
                 var dropDef = oldDef.
-                    Where(i => !newDef.Contains(i));
+                    Where(i => !newDef.Contains(i))
+                    .Select(i => ThanosColumn(i,tableClass.Name));
 
                 var addDef = newDef.
                     Where(i => !oldDef.Contains(i));
@@ -281,10 +281,20 @@ namespace WebCrudProject.Services.ORM
 
                 if (dropDef.Any())
                 {
-                    // TODOD
+                    await Task.WhenAll(dropDef);
+                    await UpdateTableDefinition(newDefinition);
                 }
 
                 _cache = await GetTableDefinitionsAsync();
+            }
+        }
+
+        private async Task ThanosColumn(string i,string tableClass)
+        {
+            using (var connection = CreateConnecton())
+            {
+                var query = $"ALTER TABLE {tableClass} ALTER COLUMN {i} NULL";
+                await connection.ExecuteAsync(query);
             }
         }
 
@@ -312,10 +322,16 @@ namespace WebCrudProject.Services.ORM
             await connection.ExecuteAsync(builder.ToString(), model);
         }
 
-        private async Task UpdateTableDefinition(TableDefinition model, SqlConnection connection)
+        private async Task UpdateTableDefinition(TableDefinition model, SqlConnection connection = null)
         {
+            var dispose = false;
+            if (connection == null)
+            {
+                connection = CreateConnecton();
+                dispose = true;
+            }
             var names = _tableDefinitionProperties.GetNames();
-
+            
             var builder = new StringBuilder();
 
             model.LastUpdated = DateTime.Now;
@@ -329,6 +345,12 @@ namespace WebCrudProject.Services.ORM
             builder.AppendLine(" WHERE Id = @Id");
 
             await connection.ExecuteAsync(builder.ToString(), model);
+
+
+            if(dispose)
+            {
+                await connection.DisposeAsync();
+            }
         }
 
         public IEnumerable<PropertyInfo> GetProperties(Type type)

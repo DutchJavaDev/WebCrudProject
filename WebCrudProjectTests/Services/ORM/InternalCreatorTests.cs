@@ -113,6 +113,13 @@ namespace WebCrudProject.Services.ORM.Tests
             // Assert
             Assert.IsFalse(oldDef.Equals(await _model.GetTableDefinitionAsync(type)));
             Assert.IsTrue((await _model.GetTableDefinitionAsync(type)).PropertyCount > oldDef.PropertyCount);
+
+            // Act 2
+            await _model.CheckForTableDefinitionUpdate(type, tableClass, tableParams);
+
+            // Assert 2
+            Assert.IsTrue(oldDef.Equals(await _model.GetTableDefinitionAsync(type)));
+            Assert.IsFalse((await _model.GetTableDefinitionAsync(type)).PropertyCount > oldDef.PropertyCount);
         }
 
         [TestMethod]

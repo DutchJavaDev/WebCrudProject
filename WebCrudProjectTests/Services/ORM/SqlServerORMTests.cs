@@ -9,6 +9,12 @@ namespace WebCrudProject.Services.ORM.Tests
     {
         private IORM _model;
         private readonly string ConnectionStrng = @"data source=LAPTOP-BORIS;initial catalog=webcrudproject;persist security info=True;Integrated Security=SSPI;";
+        private Type[] _objects = new Type[]
+        {
+            typeof(A),
+            typeof(B),
+            typeof(C),
+        };
 
         [TestInitialize]
         public void Init() 
@@ -19,20 +25,22 @@ namespace WebCrudProject.Services.ORM.Tests
         [TestMethod()]
         public async Task ObjectContextTest()
         {
-            // Arrange
-            var objects = new Type[] 
-            { 
-                typeof(A),
-                typeof(B),
-                typeof(C),
-            };
-
             // Act
-            await _model.InitAsync(ConnectionStrng, objects);
+            await _model.InitAsync(ConnectionStrng, _objects);
 
             // Assert
             Assert.IsNotNull(_model.GetObjectContext());
         }
+
+        [TestCleanup]
+        public async Task ClenaUp()
+        {
+            foreach (var type in _objects)
+            {
+                await _model.ClearTableDataAsync(type);
+            }
+        }
+
     }
 
     [Table("tblA")]
