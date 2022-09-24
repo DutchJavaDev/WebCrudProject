@@ -115,6 +115,39 @@ namespace WebCrudProject.Services.ORM.Tests
             Assert.IsTrue((await _model.GetTableDefinitionAsync(type)).PropertyCount > oldDef.PropertyCount);
         }
 
+        [TestMethod]
+        public async Task ClearTableTest() 
+        {
+            // Arrange
+            var type = typeof(DynamicClass);
+            var tableAttribute = _model.GetTableAttribute(type);
+            var props = _model.GetProperties(type);
+            var tableParams = Common.ConverToSQLTypes(props);
+
+            await _model.CreateTableAsync(type, tableAttribute.Name, tableParams);
+
+            using (var connection = _model.CreateConnecton())
+            {
+                connection.Insert(new DynamicClass 
+                {
+                    DateCreated = DateTime.Now,
+                    LastUpdated = DateTime.Now
+                });
+
+                var items = await connection.GetAllAsync<DynamicClass>();
+
+                Assert.IsTrue(items.Any());
+
+                // Act
+                await _model.ClearTable(type);
+
+
+                // Assert
+                items = await connection.GetAllAsync<DynamicClass>();
+                Assert.IsFalse(items.Any());
+            }
+        }
+
         [TestCleanup]
         public async Task CleanUp() 
         {

@@ -17,7 +17,7 @@ namespace WebCrudProject.Services.ORM.Models.Tests
         public void Init()
         {
             _base = new SqlServerORM();
-            _base.Init(_connectionString, new Type[] { typeof(User) });
+            _base.InitAsync(_connectionString, new Type[] { typeof(User) });
             _model = _base.GetObjectContext();
         }
 
@@ -28,7 +28,7 @@ namespace WebCrudProject.Services.ORM.Models.Tests
             var user = CreateUser().First();
 
             // Act
-            await _model.Insert(user);
+            await _model.InsertAsync(user);
 
             // Assert
             Assert.IsTrue(true);
@@ -41,15 +41,85 @@ namespace WebCrudProject.Services.ORM.Models.Tests
             var user = CreateUser().First();
 
             // Act
-            await _model.Insert(user);
+            await _model.InsertAsync(user);
 
-            var _user = await _model.Single<User>();
+            var _user = await _model.SingleAsync<User>();
 
             // Assert
             Assert.IsNotNull(_user);
         }
 
-        private IEnumerable<User> CreateUser(int amout = 1)
+        [TestMethod]
+        public async Task BaseObjectContextUpdateTest()
+        {
+            // Arrange
+            var user = CreateUser().First();
+
+            await _model.InsertAsync(user);
+
+            user.Email = "changed@lol.com";
+
+            // Act
+            await _model.UpdateAsync(user);
+
+            // Assert
+            var dbVersion = await _model.SingleAsync<User>();
+            Assert.AreEqual(user.Email, dbVersion.Email);
+        }
+
+        [TestMethod]
+        public async Task BaseObjectContextGetByIdTest()
+        {
+            // Arrange
+            var user = CreateUser().First();
+
+            await _model.InsertAsync(user);
+
+            // Act
+            var dbVersion = await _model.GetByIdAsync<User>(user.Id);
+
+            // Assert
+            Assert.IsTrue(user.Equals(dbVersion));
+        }
+
+        [TestMethod]
+        public async Task BaseObjectContextGetListTest()
+        {
+            // Arrange
+            var users = CreateUser(5);
+
+            await _model.InsertAsync(users);
+
+            // Act
+            var list = await _model.GetListAsync<User>();
+
+            // Assert
+            Assert.AreEqual(users.Count(), list.Count());
+        }
+
+        [TestMethod]
+        public async Task BaseObjectContextDeleteTest()
+        {
+            // Arrange
+            var user = CreateUser().First();
+
+            await _model.InsertAsync(user);
+
+            // Act
+            await _model.DeleteAsync(user);
+
+            // Assert
+            var dbVerson = await _model.GetByIdAsync<User>(user.Id);
+            Assert.IsNull(dbVerson);
+        }
+
+        [TestCleanup]
+        public async Task CleanUp()
+        {
+            await _base.ClearTableDataAsync(typeof(User));
+        }
+
+        private User[] CreateUser(int amout = 1)
         {
            return Enumerable.Range(0, amout)
                 .Select(x => new User 
@@ -60,7 +130,7 @@ namespace WebCrudProject.Services.ORM.Models.Tests
                     LastUpdated = DateTime.Now,
                     dDouble = 144,
                     B = true
-                });
+                }).ToArray();
         }
     }
 
@@ -73,6 +143,16 @@ namespace WebCrudProject.Services.ORM.Models.Tests
         public DateTime LastUpdated { get; set; }
         public DateTime DateCreated { get; set; }
         public double dDouble { get; set; }
-        public bool B { get; set; } 
+        public bool B { get; set; }
+
+        public override bool Equals(object? obj)
+        {
+            if(obj is User other)
+            {
+                return Id == other.Id;
+            }
+
+            return false;
+        }
     }
 }

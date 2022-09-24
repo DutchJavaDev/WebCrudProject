@@ -175,6 +175,20 @@ namespace WebCrudProject.Services.ORM
             }
         }
 
+        public async Task ClearTable(Type type)
+        {
+            var exists = _cache.Where(i => i.Type == type.Name).First();
+
+            if (exists != null)
+            {
+                var query = $"TRUNCATE TABLE {exists.Name}";
+                using (var connection = CreateConnecton())
+                {
+                    await connection.ExecuteAsync(query);
+                }
+            }
+        }
+
         public async Task DeleteTestTablesAsync()
         {
 
@@ -335,7 +349,7 @@ namespace WebCrudProject.Services.ORM
                 publicGet.Value;
         }
 
-        private SqlConnection CreateConnecton()
+        public SqlConnection CreateConnecton()
         {
             return new SqlConnection(_connectionString);
         }

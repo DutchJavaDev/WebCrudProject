@@ -28,12 +28,11 @@ namespace WebCrudProject.Services.ORM.Tests
             };
 
             // Act
-            await _model.Init(ConnectionStrng, objects);
+            await _model.InitAsync(ConnectionStrng, objects);
 
             // Assert
             Assert.IsNotNull(_model.GetObjectContext());
         }
-
     }
 
     [Table("tblA")]

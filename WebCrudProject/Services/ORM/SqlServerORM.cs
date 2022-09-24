@@ -20,7 +20,7 @@ namespace WebCrudProject.Services.ORM
         /// <param name="connectionString"></param>
         /// <param name="objects"></param>
         /// <returns></returns>
-        public async Task Init(string connectionString, IEnumerable<Type> objects)
+        public async Task InitAsync(string connectionString, IEnumerable<Type> objects)
         {
             ConnectionString = connectionString;
 
@@ -70,6 +70,11 @@ namespace WebCrudProject.Services.ORM
         public IObjectContext GetObjectContext()
         {
             return new BaseObjectContext(ConnectionString);
+        }
+
+        public async Task ClearTableDataAsync(Type type)
+        {
+            await internalService.ClearTable(type);
         }
     }
 }

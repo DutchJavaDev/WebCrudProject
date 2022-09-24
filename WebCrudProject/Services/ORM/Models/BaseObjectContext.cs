@@ -1,6 +1,4 @@
 ﻿using System.Data.SqlClient;
-using Dapper;
-using Dapper.Contrib;
 using Dapper.Contrib.Extensions;
 using WebCrudProject.Services.ORM.Interfaces;
 
@@ -14,50 +12,56 @@ namespace WebCrudProject.Services.ORM.Models
             _connectionString = connectionString;
         }
 
-        public Task Delete(object entityToDelete)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<T> GetById<T>(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<T>> GetList<T>()
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task Insert<T>(T entityToInsert) where T : class
+        public async Task DeleteAsync<T>(T entityToDelete) where T : class
         {
             using (var connection = await CreateConnection())
             {
-                try
-                {
-                    await connection.InsertAsync(entityToInsert);
-                }
-                catch (SqlException e)
-                {
+                await connection.DeleteAsync(entityToDelete);
+            }
+        }
 
-                    throw;
-                }
+        public async Task<T> GetByIdAsync<T>(int id) where T : class
+        {
+            using (var connection = await CreateConnection())
+            {
+                return await connection.GetAsync<T>(id);
+            }
+        }
+
+        public async Task<IEnumerable<T>> GetListAsync<T>() where T : class
+        {
+            using (var connection = await CreateConnection())
+            {
+                return await connection.GetAllAsync<T>();
+            }
+        }
+
+        public async Task InsertAsync<T>(T entityToInsert) where T : class
+        {
+            using (var connection =  await CreateConnection())
+            {
+                await connection.InsertAsync(entityToInsert);
             }
 
         }
 
-        public async Task<T> Single<T>() where T : class
+        public async Task<T?> SingleAsync<T>() where T : class
         {
             using(var connection = await CreateConnection())
             {
-                return (await connection.GetAllAsync<T>())
+                var result = (await connection.GetAllAsync<T>())
                     .FirstOrDefault() ?? default;
+
+                return result;
             }
         }
 
-        public Task Update(object entityToUpdate)
+        public async Task UpdateAsync<T>(T entityToUpdate) where T : class
         {
-            throw new NotImplementedException();
+            using (var connection = await CreateConnection())
+            {
+                await connection.UpdateAsync(entityToUpdate);
+            }
         }
 
         private async Task<SqlConnection> CreateConnection()
