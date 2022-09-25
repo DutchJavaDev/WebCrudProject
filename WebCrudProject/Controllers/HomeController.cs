@@ -17,20 +17,7 @@ namespace WebCrudProject.Controllers
         [HttpGet]
         public async Task<IActionResult> Index([FromServices] IObjectContext context)
         {
-            var model = new AuthenticationModel 
-            {
-                Email = "Boris",
-                Password = "KWende",
-                ReturnUrl = "asdasdsa",
-                DateCreated = DateTime.Now,
-                LastUpdated = DateTime.Now
-            };
-
-            await context.InsertAsync(model);
-
-            var db = await context.GetListAsync<AuthenticationModel>();
-
-            return View(db.Last());
+            return View(context == null);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
