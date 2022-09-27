@@ -1,10 +1,15 @@
+using WebCrudProject.Auth;
+using WebCrudProject.Auth.Models;
 using WebCrudProject.Services.ORM;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("Default");
 
-var types = new Type[] {  };
+var types = new Type[] 
+{ 
+    typeof(ELUser), 
+};
 
 var sqlOrm = new SqlServerORM();
 await sqlOrm.InitAsync(connectionString, types);
@@ -29,6 +34,9 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.Use(AuthenticationMiddelWare.SessionResolve);
+app.Use(AuthenticationMiddelWare.CookieResolve);
 
 app.UseHttpsRedirection();
 

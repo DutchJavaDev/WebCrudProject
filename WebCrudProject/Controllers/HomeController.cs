@@ -15,9 +15,9 @@ namespace WebCrudProject.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index([FromServices] IObjectContext context)
+        public async Task<IActionResult> Index()
         {
-            return View(context == null);
+            return View();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

@@ -1,13 +1,11 @@
 ﻿@using System.Security.Claims
-@model bool
 @{
     ViewData["Title"] = "Home Page";
 }
-@Model
 <div class="text-center">
    
    <a asp-controller="Document" asp-action="Index">Create Document</a>
-
+   
     @if (Model != null)
     {
         
