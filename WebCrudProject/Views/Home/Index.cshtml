@@ -13,5 +13,34 @@
     else
     {
         <partial name="_AuthenticationPartial" for="AuthenticationModel" />
+
+        <table class="model-state">
+            @foreach (var item in Model.ErrorList)
+            {
+                <tr>
+                    <td><b>@item</b></td>
+                </tr>
+            }
+        </table>
+
+        <style>
+            table.model-state {
+                border-color: #600;
+                border-width: 0 0 1px 1px;
+                border-style: solid;
+                border-collapse: collapse;
+                font-size: .8em;
+                font-family: arial;
+            }
+
+                table.model-state td {
+                    border-color: #600;
+                    border-width: 1px 1px 0 0;
+                    border-style: solid;
+                    margin: 0;
+                    padding: .25em .75em;
+                    background-color: #FFC;
+                }
+        </style>
     }
 </div>

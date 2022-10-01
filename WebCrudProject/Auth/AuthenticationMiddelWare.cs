@@ -21,7 +21,7 @@ namespace WebCrudProject.Auth
 
                 if (!hasSession)
                 {
-                    await next();
+                    goto END;
                 }
 
                 var sessionService = context.RequestServices.GetRequiredService<ISessionService>();
@@ -64,7 +64,7 @@ namespace WebCrudProject.Auth
                     await sessionService.DeleteSessionAsync(int.Parse(sessionId)).ConfigureAwait(false);
                 }
             }
-
+            END:
             await next();
         }
 

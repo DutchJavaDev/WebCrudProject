@@ -13,34 +13,37 @@ namespace WebCrudProject.Controllers
             [FromServices] IAuthenticationService authentication,
             [FromServices] ISessionService session)
         {
-            switch (authenticationModel.AuthenticationType)
+            if (ModelState.IsValid)
             {
-                case UserAuthenticationState.Login:
-                    var user = await authentication.LoginAsync(authenticationModel);
-                    if (user == null)
-                    {
-                        // Back to login page ??
-                        // Bla bla bla :D
-                    }
-                    else
-                    {
-                        var sessionId = await session.CreateSessionAsync(user);
-                        SetSessionId(sessionId);
-                    }
-                    break;
+                switch (authenticationModel.AuthenticationType)
+                {
+                    case UserAuthenticationState.Login:
+                        var user = await authentication.LoginAsync(authenticationModel);
+                        if (user == null)
+                        {
+                            // Back to login page ??
+                            // Bla bla bla :D
+                        }
+                        else
+                        {
+                            var sessionId = await session.CreateSessionAsync(user);
+                            SetSessionId(sessionId);
+                        }
+                        break;
 
-                case UserAuthenticationState.Register:
-                    var result = await authentication.RegisterAsync(authenticationModel);
+                    case UserAuthenticationState.Register:
+                        var result = await authentication.RegisterAsync(authenticationModel);
 
-                    if (result)
-                    {
-                        user = await authentication.LoginAsync(authenticationModel);
-                        var sessionId = await session.CreateSessionAsync(user);
-                        SetSessionId(sessionId);
-                    }
-                    break;
+                        if (result)
+                        {
+                            user = await authentication.LoginAsync(authenticationModel);
+                            var sessionId = await session.CreateSessionAsync(user);
+                            SetSessionId(sessionId);
+                        }
+                        break;
 
-                default: break;
+                    default: break;
+                }
             }
 
             return RedirectToAction("Index","Home");

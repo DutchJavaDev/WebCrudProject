@@ -1,5 +1,9 @@
 ﻿@using WebCrudProject.Auth.Models
 @model AuthenticationModel
+
+@*
+    Switch between register and login
+*@
 <form asp-controller="Authentication" asp-action="Index" method="post">
 @switch (Model.AuthenticationType)
 {
