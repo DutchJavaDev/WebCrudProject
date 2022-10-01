@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Security.Claims;
+using System.Text;
+using WebCrudProject.Auth;
+using WebCrudProject.Auth.Models;
+using WebCrudProject.Auth.Services.Interfaces;
 using WebCrudProject.Models;
-using WebCrudProject.Services.ORM.Interfaces;
 
 namespace WebCrudProject.Controllers
 {
@@ -15,9 +19,9 @@ namespace WebCrudProject.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View();
+            return View(DefaultViewModel());
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

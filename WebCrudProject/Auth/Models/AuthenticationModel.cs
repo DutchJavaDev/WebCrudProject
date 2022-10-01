@@ -6,6 +6,14 @@
         Login = 1
     }
 
+    public enum ELURoles : byte
+    {
+        Null,
+        Company,
+        User,
+        Admin,
+    }
+
     public sealed class AuthenticationModel
     {
         public UserAuthenticationState AuthenticationType { get; set; } = UserAuthenticationState.Register;

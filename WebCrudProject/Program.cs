@@ -1,14 +1,19 @@
 using WebCrudProject.Auth;
 using WebCrudProject.Auth.Models;
+using WebCrudProject.Auth.Services;
+using WebCrudProject.Auth.Services.Interfaces;
 using WebCrudProject.Services.ORM;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSession();
 
 var connectionString = builder.Configuration.GetConnectionString("Default");
 
 var types = new Type[] 
 { 
     typeof(ELUser), 
+    typeof(ELUJwtSession)
 };
 
 var sqlOrm = new SqlServerORM();
@@ -23,9 +28,15 @@ builder.Services.AddScoped((context) =>
     return iorm.GetObjectContext();
 });
 
+builder.Services.AddScoped<ISessionService,SessionService>();
+
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
+app.UseSession();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -36,7 +47,6 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.Use(AuthenticationMiddelWare.SessionResolve);
-app.Use(AuthenticationMiddelWare.CookieResolve);
 
 app.UseHttpsRedirection();
 

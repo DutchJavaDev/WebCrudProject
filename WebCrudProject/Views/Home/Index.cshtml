@@ -1,36 +1,17 @@
 ﻿@using System.Security.Claims
+@model DefaultViewModel
 @{
     ViewData["Title"] = "Home Page";
+    Layout = "_Layout";
 }
 <div class="text-center">
-   
-   <a asp-controller="Document" asp-action="Index">Create Document</a>
-   
-    @if (Model != null)
+
+    @if (Model.IsAuthenticated)
     {
-        
-           <div>
-       <p>documents</p>
-
-       @*@foreach (var doc in Model)
-       {
-           <div class="border-2">
-               <p>@doc.DocumentTitle</p>
-                    @Html.ActionLink("Edit","Update","Document", new { number = doc.DocumentNumber }, new {});
-                    @Html.ActionLink("Delete", "DeleteDocument", "Document", new  { number = doc.DocumentNumber }, new{})
-           </div>
-       }*@
-       </div>
+        @Model.Email
     }
-
-    &nbsp;
-    <div class="w-50 text-center bg-info">
-        <form asp-controller="Upload" asp-action="Files" method="post" enctype="multipart/form-data">
-            @Html.AntiForgeryToken()
-            <p>Select Files</p>
-            <input type="file" name="files" placeholder="Upload" accept="image/*" />
-            <br />
-            <input class="btn btn-primary" type="submit" value="Send" />
-        </form>
-    </div>
+    else
+    {
+        <partial name="_AuthenticationPartial" for="AuthenticationModel" />
+    }
 </div>

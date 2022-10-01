@@ -1,0 +1,46 @@
+﻿@using WebCrudProject.Auth.Models
+@model AuthenticationModel
+<form asp-controller="Authentication" asp-action="Index" method="post">
+@switch (Model.AuthenticationType)
+{
+    case UserAuthenticationState.Login:
+            @Html.AntiForgeryToken()
+            <div>
+                @Html.HiddenFor(m => m.AuthenticationType)
+            </div>
+            <div>
+                @Html.TextBoxFor(m => m.Email)
+            </div>
+            <div>
+                @Html.PasswordFor(m => m.Password)
+            </div>
+            <div>
+                @Html.CheckBoxFor(m => m.RememberMe)
+            </div>
+            <br />
+            <input type="submit" value="Login">
+        break;
+
+    case UserAuthenticationState.Register:
+            @Html.AntiForgeryToken()    
+            <div>
+                @Html.HiddenFor(m => m.AuthenticationType)
+            </div>
+            <div>
+                @Html.TextBoxFor(m => m.Email)
+            </div>
+            <div>
+                @Html.PasswordFor(m => m.Password)
+            </div>
+            <br />
+            <input type="submit" value="Register">
+            <span>adsads</span>
+        break;
+
+    default:
+        <h1 style="color:red;">
+            This schould not have happend -.-
+        </h1>
+        break;
+}
+</form>
