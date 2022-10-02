@@ -6,7 +6,7 @@ namespace WebCrudProject.Auth.Services.Interfaces
     {
         Task<string> CreateSessionAsync(ELUser requester);
 
-        Task<(bool,ELUJwtSession)> ResolveSessionAsync(string sessionId);
+        Task<(bool,ELJwtSession)> ResolveSessionAsync(string sessionId);
 
         Task DeleteSessionAsync(int sessionId);
     }

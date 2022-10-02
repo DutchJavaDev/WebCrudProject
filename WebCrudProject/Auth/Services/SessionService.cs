@@ -17,7 +17,7 @@ namespace WebCrudProject.Auth.Services
             var expired = created.AddSeconds(30);
             var id = Guid.NewGuid().ToString().Replace("-","");
 
-            var session = new ELUJwtSession 
+            var session = new ELJwtSession 
             {
                 UserId = requester.Id,
                 DateCreated = created,
@@ -35,15 +35,15 @@ namespace WebCrudProject.Auth.Services
 
         public async Task DeleteSessionAsync(int sessionId)
         {
-            var session = _context.GetByIdAsync<ELUJwtSession>(sessionId);
+            var session = _context.GetByIdAsync<ELJwtSession>(sessionId);
 
             await _context.DeleteAsync(session)
                 .ConfigureAwait(false);
         }
 
-        public async Task<(bool,ELUJwtSession)> ResolveSessionAsync(string sessionId)
+        public async Task<(bool,ELJwtSession)> ResolveSessionAsync(string sessionId)
         {
-            var sessions = (await _context.GetListAsync<ELUJwtSession>())
+            var sessions = (await _context.GetListAsync<ELJwtSession>())
                 .Where(i => i.SessionId == sessionId);
 
             if (sessions.Any())
@@ -53,13 +53,13 @@ namespace WebCrudProject.Auth.Services
                 if (session.IsExpired())
                 {
                     await _context.DeleteAsync(session);
-                    return (false, new ELUJwtSession { ExpireDate = DateTime.Now.AddMinutes(-1) });
+                    return (false, new ELJwtSession { ExpireDate = DateTime.Now.AddMinutes(-1) });
                 }
 
                 return (!session.IsExpired(), session);
             }
 
-            return (false, new ELUJwtSession { ExpireDate = DateTime.Now.AddMinutes(-1) });
+            return (false, new ELJwtSession { ExpireDate = DateTime.Now.AddMinutes(-1) });
         }
 
         

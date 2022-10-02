@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebCrudProject.Auth.Models;
 using WebCrudProject.Auth.Services.Interfaces;
+using WebCrudProject.Services.Email.Interfaces;
 
 namespace WebCrudProject.Controllers
 {
@@ -11,7 +12,8 @@ namespace WebCrudProject.Controllers
         public async Task<IActionResult> Index(
             [FromForm] AuthenticationModel authenticationModel,
             [FromServices] IAuthenticationService authentication,
-            [FromServices] ISessionService session)
+            [FromServices] ISessionService session,
+            [FromServices] IELMailService mail)
         {
             if (ModelState.IsValid)
             {
@@ -37,6 +39,7 @@ namespace WebCrudProject.Controllers
                         if (result)
                         {
                             user = await authentication.LoginAsync(authenticationModel);
+                            await mail.SendAccountRegistrationAsyn(user);
                             var sessionId = await session.CreateSessionAsync(user);
                             SetSessionId(sessionId);
                         }
