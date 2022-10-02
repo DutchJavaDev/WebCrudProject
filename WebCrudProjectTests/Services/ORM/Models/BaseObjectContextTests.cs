@@ -1,15 +1,14 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WebCrudProject.Services.ORM.Interfaces;
 using Dapper.Contrib.Extensions;
+using Microsoft.Extensions.Configuration;
+using WebCrudProject.Services.ORM.Tests;
 
 namespace WebCrudProject.Services.ORM.Models.Tests
 {
     [TestClass()]
     public sealed class BaseObjectContextTests
     {
-        private static string _connectionString =
-            "data source=LAPTOP-BORIS;initial catalog=webcrudproject;persist security info=True;Integrated Security=SSPI;";
-
         private IORM _base;
         
         // Model
@@ -18,8 +17,14 @@ namespace WebCrudProject.Services.ORM.Models.Tests
         [TestInitialize]
         public async Task Init()
         {
+            var configurationBuilder = new ConfigurationBuilder()
+               .AddUserSecrets<internalCreatorTests>()
+               .Build();
+
+            var connectionString = configurationBuilder["DATABASE:DEV"];
+
             _base = new SqlServerORM();
-            await _base.InitAsync(_connectionString, new Type[] { typeof(User), typeof(DynamicClass) });
+            await _base.InitAsync(connectionString, new Type[] { typeof(User), typeof(DynamicClass) });
             _model = _base.GetObjectContext();
         }
 

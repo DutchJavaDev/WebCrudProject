@@ -1,4 +1,5 @@
 ﻿using Dapper.Contrib.Extensions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WebCrudProject.Services.ORM.Interfaces;
 using WebCrudProject.Services.ORM.Models;
@@ -21,7 +22,13 @@ namespace WebCrudProject.Services.ORM.Tests
         [TestInitialize]
         public void Init() 
         {
-            _model = new InternalCreator("data source=LAPTOP-BORIS;initial catalog=webcrudproject;persist security info=True;Integrated Security=SSPI;");
+            var configurationBuilder = new ConfigurationBuilder()
+                .AddUserSecrets<internalCreatorTests>()
+                .Build();
+
+            var connectionString = configurationBuilder["DATABASE:DEV"];
+
+            _model = new InternalCreator(connectionString);
         }
 
         [TestMethod]

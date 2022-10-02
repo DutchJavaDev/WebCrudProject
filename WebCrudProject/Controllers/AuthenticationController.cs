@@ -25,6 +25,7 @@ namespace WebCrudProject.Controllers
                         {
                             // Back to login page ??
                             // Bla bla bla :D
+                            ModelState.AddModelError("Login fail", "Login failed");
                         }
                         else
                         {
@@ -43,6 +44,8 @@ namespace WebCrudProject.Controllers
                             var sessionId = await session.CreateSessionAsync(user);
                             SetSessionId(sessionId);
                         }
+
+                        ModelState.AddModelError("Register fail", "Register failed");
                         break;
 
                     default: break;

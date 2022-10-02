@@ -40,7 +40,7 @@ namespace WebCrudProject.Auth.Services
                 .Where(i => i.Email == model.Email);
 
             if(exists.Any())
-            {
+            { 
                 return false;
             }
 

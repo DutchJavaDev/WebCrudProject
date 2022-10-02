@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WebCrudProject.Services.ORM.Interfaces;
 using Dapper.Contrib.Extensions;
+using Microsoft.Extensions.Configuration;
 
 namespace WebCrudProject.Services.ORM.Tests
 {
@@ -8,7 +9,7 @@ namespace WebCrudProject.Services.ORM.Tests
     public sealed class SqlServerORMTests
     {
         private IORM _model;
-        private readonly string ConnectionStrng = @"data source=LAPTOP-BORIS;initial catalog=webcrudproject;persist security info=True;Integrated Security=SSPI;";
+        private string ConnectionStrng;
         private Type[] _objects = new Type[]
         {
             typeof(A),
@@ -19,6 +20,12 @@ namespace WebCrudProject.Services.ORM.Tests
         [TestInitialize]
         public void Init() 
         {
+            var configurationBuilder = new ConfigurationBuilder()
+               .AddUserSecrets<internalCreatorTests>()
+               .Build();
+
+            ConnectionStrng = configurationBuilder["DATABASE:DEV"];
+
             _model = new SqlServerORM();
         }
 
