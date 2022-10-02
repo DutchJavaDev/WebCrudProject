@@ -2,6 +2,8 @@ using WebCrudProject.Auth;
 using WebCrudProject.Auth.Models;
 using WebCrudProject.Auth.Services;
 using WebCrudProject.Auth.Services.Interfaces;
+using WebCrudProject.Services.Email;
+using WebCrudProject.Services.Email.Interfaces;
 using WebCrudProject.Services.ORM;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +15,7 @@ var connectionString = builder.Configuration.GetConnectionString("Default");
 var types = new Type[] 
 { 
     typeof(ELUser), 
-    typeof(ELUJwtSession)
+    typeof(ELJwtSession)
 };
 
 var sqlOrm = new SqlServerORM();
@@ -31,6 +33,8 @@ builder.Services.AddScoped((context) =>
 builder.Services.AddScoped<ISessionService,SessionService>();
 
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+
+builder.Services.AddScoped<IELMailService, ELMailService>();
 
 builder.Services.AddControllersWithViews();
 

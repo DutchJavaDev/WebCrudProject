@@ -4,7 +4,7 @@ using WebCrudProject.Services.ORM.Interfaces;
 namespace WebCrudProject.Auth.Models
 {
     [Table("tblJwtSession")]
-    public class ELUJwtSession : ISqlModel
+    public class ELJwtSession : ISqlModel
     {
         public int Id { get; set;}
         public int UserId { get; set;}

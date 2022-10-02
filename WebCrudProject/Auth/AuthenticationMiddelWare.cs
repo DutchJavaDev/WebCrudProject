@@ -68,7 +68,7 @@ namespace WebCrudProject.Auth
             await next();
         }
 
-        private static IEnumerable<Claim> GetClaims(ELUJwtSession session)
+        private static IEnumerable<Claim> GetClaims(ELJwtSession session)
         {
             var claims = new List<Claim>
             {
