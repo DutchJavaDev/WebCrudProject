@@ -18,7 +18,7 @@ namespace WebCrudProject.Services.ORM.Models.Tests
         public async Task Init()
         {
             var configurationBuilder = new ConfigurationBuilder()
-               .AddUserSecrets<internalCreatorTests>()
+               .AddUserSecrets<Program>()
                .Build();
 
             var connectionString = configurationBuilder["DevConnectionString"];
