@@ -36,11 +36,11 @@ namespace WebCrudProject.Services.ORM.Models
             }
         }
 
-        public async Task InsertAsync<T>(T entityToInsert) where T : class
+        public async Task<int> InsertAsync<T>(T entityToInsert) where T : class
         {
             using (var connection =  await CreateConnection())
             {
-                await connection.InsertAsync(entityToInsert);
+                return await connection.InsertAsync(entityToInsert);
             }
 
         }

@@ -35,10 +35,10 @@ namespace WebCrudProject.Services.ORM.Models.Tests
             var user = CreateUser().First();
 
             // Act
-            await _model.InsertAsync(user);
+            var id = await _model.InsertAsync(user);
 
             // Assert
-            Assert.IsTrue(true);
+            Assert.IsTrue(id >= 0); // Proper check
         }
 
         [TestMethod]
@@ -71,6 +71,7 @@ namespace WebCrudProject.Services.ORM.Models.Tests
 
             // Assert
             var dbVersion = await _model.SingleAsync<User>();
+            Assert.IsNotNull(dbVersion);
             Assert.AreEqual(user.Email, dbVersion.Email);
         }
 
@@ -86,6 +87,7 @@ namespace WebCrudProject.Services.ORM.Models.Tests
             var dbVersion = await _model.GetByIdAsync<User>(user.Id);
 
             // Assert
+            Assert.IsNotNull(dbVersion);
             Assert.IsTrue(user.Equals(dbVersion));
         }
 
@@ -101,7 +103,8 @@ namespace WebCrudProject.Services.ORM.Models.Tests
             var list = await _model.GetListAsync<User>();
 
             // Assert
-            Assert.AreEqual(users.Count(), list.Count());
+            Assert.IsNotNull(list);
+            Assert.AreEqual(users.Length, list.Count());
         }
 
         [TestMethod]
@@ -117,6 +120,7 @@ namespace WebCrudProject.Services.ORM.Models.Tests
 
             // Assert
             var dbVerson = await _model.GetByIdAsync<User>(user.Id);
+            Assert.IsNotNull(dbVerson);
             Assert.IsNull(dbVerson);
         }
 
@@ -126,7 +130,7 @@ namespace WebCrudProject.Services.ORM.Models.Tests
             await _base.ClearTableDataAsync(typeof(User));
         }
 
-        private User[] CreateUser(int amout = 1)
+        private static User[] CreateUser(int amout = 1)
         {
            return Enumerable.Range(0, amout)
                 .Select(x => new User 
@@ -137,16 +141,6 @@ namespace WebCrudProject.Services.ORM.Models.Tests
                     LastUpdated = DateTime.Now,
                     dDouble = 144,
                     B = true
-                }).ToArray();
-        }
-
-        private DynamicClass[] CreateDynamicClas(int amount = 1)
-        {
-            return Enumerable.Range(0, amount)
-                .Select(x => new DynamicClass
-                {
-                    DateCreated = DateTime.Now,
-                    LastUpdated = DateTime.Now,
                 }).ToArray();
         }
     }

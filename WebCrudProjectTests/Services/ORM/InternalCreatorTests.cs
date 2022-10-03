@@ -38,6 +38,7 @@ namespace WebCrudProject.Services.ORM.Tests
             var props = _model.GetProperties(_testClassType);
 
             // Assert
+            Assert.IsNotNull(props);
             Assert.AreEqual(13, props.Count());
         }
 
@@ -48,6 +49,7 @@ namespace WebCrudProject.Services.ORM.Tests
             var tableClass = _model.GetTableAttribute(_testClassType);
 
             // Assert
+            Assert.IsNotNull(tableClass);
             Assert.AreEqual("testClass", tableClass.Name);
         }
 
@@ -72,6 +74,7 @@ namespace WebCrudProject.Services.ORM.Tests
             var dbVersion = await _model.GetTableDefinitionAsync(type);
 
             // Assert
+            Assert.IsNotNull(dbVersion);
             Assert.IsTrue(dbVersion.Equals(magicVersion));
         }
 
