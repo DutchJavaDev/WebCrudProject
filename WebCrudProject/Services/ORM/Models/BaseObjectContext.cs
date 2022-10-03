@@ -12,6 +12,7 @@ namespace WebCrudProject.Services.ORM.Models
             _connectionString = connectionString;
         }
 
+
         public async Task DeleteAsync<T>(T entityToDelete) where T : class
         {
             using (var connection = await CreateConnection())
