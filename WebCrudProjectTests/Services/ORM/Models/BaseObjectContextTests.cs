@@ -18,7 +18,7 @@ namespace WebCrudProject.Services.ORM.Models.Tests
         public async Task Init()
         {
             var configurationBuilder = new ConfigurationBuilder()
-               .AddUserSecrets<Program>()
+               .AddUserSecrets<internalCreatorTests>()
                .Build();
 
             var connectionString = configurationBuilder["DevConnectionString"];
@@ -120,7 +120,6 @@ namespace WebCrudProject.Services.ORM.Models.Tests
 
             // Assert
             var dbVerson = await _model.GetByIdAsync<User>(user.Id);
-            Assert.IsNotNull(dbVerson);
             Assert.IsNull(dbVerson);
         }
 
