@@ -92,6 +92,7 @@ namespace WebCrudProject.Services.ORM
 
             using (var conn = CreateConnecton())
             {
+
                 await conn.OpenAsync();
 
                 var result = await conn.ExecuteScalarAsync(query, new { tableName });
