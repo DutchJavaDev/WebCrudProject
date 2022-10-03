@@ -26,7 +26,7 @@ namespace WebCrudProject.Services.ORM.Tests
                 .AddUserSecrets<internalCreatorTests>()
                 .Build();
 
-            var connectionString = configurationBuilder["DATABASE:DEV"];
+            var connectionString = configurationBuilder["DevConnectionString"];
 
             _model = new InternalCreator(connectionString);
         }

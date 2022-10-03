@@ -21,7 +21,7 @@ namespace WebCrudProject.Services.ORM.Models.Tests
                .AddUserSecrets<internalCreatorTests>()
                .Build();
 
-            var connectionString = configurationBuilder["DATABASE:DEV"];
+            var connectionString = configurationBuilder["DevConnectionString"];
 
             _base = new SqlServerORM();
             await _base.InitAsync(connectionString, new Type[] { typeof(User), typeof(DynamicClass) });

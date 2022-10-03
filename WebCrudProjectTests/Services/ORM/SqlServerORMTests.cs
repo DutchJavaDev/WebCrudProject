@@ -24,7 +24,7 @@ namespace WebCrudProject.Services.ORM.Tests
                .AddUserSecrets<internalCreatorTests>()
                .Build();
 
-            ConnectionStrng = configurationBuilder["DATABASE:DEV"];
+            ConnectionStrng = configurationBuilder["DevConnectionString"];
 
             _model = new SqlServerORM();
         }
