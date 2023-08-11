@@ -1,4 +1,5 @@
 ﻿using Dapper.Contrib.Extensions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WebCrudProject.Services.ORM.Interfaces;
 using WebCrudProject.Services.ORM.Models;
@@ -21,7 +22,13 @@ namespace WebCrudProject.Services.ORM.Tests
         [TestInitialize]
         public void Init() 
         {
-            _model = new InternalCreator("data source=LAPTOP-BORIS;initial catalog=webcrudproject;persist security info=True;Integrated Security=SSPI;");
+            var configurationBuilder = new ConfigurationBuilder()
+                .AddUserSecrets<internalCreatorTests>()
+                .Build();
+
+            var connectionString = configurationBuilder["DevConnectionString"];
+
+            _model = new InternalCreator(connectionString);
         }
 
         [TestMethod]
@@ -31,6 +38,7 @@ namespace WebCrudProject.Services.ORM.Tests
             var props = _model.GetProperties(_testClassType);
 
             // Assert
+            Assert.IsNotNull(props);
             Assert.AreEqual(13, props.Count());
         }
 
@@ -41,6 +49,7 @@ namespace WebCrudProject.Services.ORM.Tests
             var tableClass = _model.GetTableAttribute(_testClassType);
 
             // Assert
+            Assert.IsNotNull(tableClass);
             Assert.AreEqual("testClass", tableClass.Name);
         }
 
@@ -65,6 +74,7 @@ namespace WebCrudProject.Services.ORM.Tests
             var dbVersion = await _model.GetTableDefinitionAsync(type);
 
             // Assert
+            Assert.IsNotNull(dbVersion);
             Assert.IsTrue(dbVersion.Equals(magicVersion));
         }
 

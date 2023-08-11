@@ -8,8 +8,6 @@ namespace WebCrudProject.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var userId = GetUserInfo()[0];
-            ///var userFiles = await fileService.ReadFiles(userId);
             return View();
         }
 
@@ -17,17 +15,6 @@ namespace WebCrudProject.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Files([FromForm] IFormFileCollection files)
         {
-            var userId = GetUserInfo()[0];
-
-            if (files == null)
-            {
-                return RedirectToAction("Index");
-            }
-            else
-            {
-                // uploading
-                //userFiles = await fileService.WriteFiles(userId, files);
-            }
 
             return RedirectToAction("Index");
         }

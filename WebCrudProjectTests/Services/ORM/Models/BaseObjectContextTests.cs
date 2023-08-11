@@ -1,15 +1,14 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WebCrudProject.Services.ORM.Interfaces;
 using Dapper.Contrib.Extensions;
+using Microsoft.Extensions.Configuration;
+using WebCrudProject.Services.ORM.Tests;
 
 namespace WebCrudProject.Services.ORM.Models.Tests
 {
     [TestClass()]
     public sealed class BaseObjectContextTests
     {
-        private static string _connectionString =
-            "data source=LAPTOP-BORIS;initial catalog=webcrudproject;persist security info=True;Integrated Security=SSPI;";
-
         private IORM _base;
         
         // Model
@@ -18,8 +17,14 @@ namespace WebCrudProject.Services.ORM.Models.Tests
         [TestInitialize]
         public async Task Init()
         {
+            var configurationBuilder = new ConfigurationBuilder()
+               .AddUserSecrets<internalCreatorTests>()
+               .Build();
+
+            var connectionString = configurationBuilder["DevConnectionString"];
+
             _base = new SqlServerORM();
-            await _base.InitAsync(_connectionString, new Type[] { typeof(User), typeof(DynamicClass) });
+            await _base.InitAsync(connectionString, new Type[] { typeof(User), typeof(DynamicClass) });
             _model = _base.GetObjectContext();
         }
 
@@ -30,10 +35,10 @@ namespace WebCrudProject.Services.ORM.Models.Tests
             var user = CreateUser().First();
 
             // Act
-            await _model.InsertAsync(user);
+            var id = await _model.InsertAsync(user);
 
             // Assert
-            Assert.IsTrue(true);
+            Assert.IsTrue(id >= 0); // Proper check
         }
 
         [TestMethod]
@@ -66,6 +71,7 @@ namespace WebCrudProject.Services.ORM.Models.Tests
 
             // Assert
             var dbVersion = await _model.SingleAsync<User>();
+            Assert.IsNotNull(dbVersion);
             Assert.AreEqual(user.Email, dbVersion.Email);
         }
 
@@ -81,6 +87,7 @@ namespace WebCrudProject.Services.ORM.Models.Tests
             var dbVersion = await _model.GetByIdAsync<User>(user.Id);
 
             // Assert
+            Assert.IsNotNull(dbVersion);
             Assert.IsTrue(user.Equals(dbVersion));
         }
 
@@ -96,7 +103,8 @@ namespace WebCrudProject.Services.ORM.Models.Tests
             var list = await _model.GetListAsync<User>();
 
             // Assert
-            Assert.AreEqual(users.Count(), list.Count());
+            Assert.IsNotNull(list);
+            Assert.AreEqual(users.Length, list.Count());
         }
 
         [TestMethod]
@@ -121,7 +129,7 @@ namespace WebCrudProject.Services.ORM.Models.Tests
             await _base.ClearTableDataAsync(typeof(User));
         }
 
-        private User[] CreateUser(int amout = 1)
+        private static User[] CreateUser(int amout = 1)
         {
            return Enumerable.Range(0, amout)
                 .Select(x => new User 
@@ -132,16 +140,6 @@ namespace WebCrudProject.Services.ORM.Models.Tests
                     LastUpdated = DateTime.Now,
                     dDouble = 144,
                     B = true
-                }).ToArray();
-        }
-
-        private DynamicClass[] CreateDynamicClas(int amount = 1)
-        {
-            return Enumerable.Range(0, amount)
-                .Select(x => new DynamicClass
-                {
-                    DateCreated = DateTime.Now,
-                    LastUpdated = DateTime.Now,
                 }).ToArray();
         }
     }

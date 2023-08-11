@@ -35,7 +35,7 @@ namespace WebCrudProject.Services.ORM
         // Check to see if this is the first tume running or not
         private async Task EnsureDefaultDefinitions()
         {
-            if (!await TableExistsAsync(_tableDefinitionTable))
+           /* if (!await TableExistsAsync(_tableDefinitionTable))
             {
                 var tableParams = Common.ConverToSQLTypes(_tableDefinitionProperties);
 
@@ -49,7 +49,7 @@ namespace WebCrudProject.Services.ORM
                 await CheckForTableDefinitionUpdate(TableDefinition, _tableAttribute, tableParams);
             }
 
-            _cache = await GetTableDefinitionsAsync();
+            _cache = await GetTableDefinitionsAsync();*/
         }
 
         public TableAttribute GetTableAttribute(Type type)
@@ -142,12 +142,12 @@ namespace WebCrudProject.Services.ORM
 
                 await connection.ExecuteScalarAsync(builder.ToString());
 
-                await InsertTableDefinition(def, connection);
-
-                _cache = await GetTableDefinitionsAsync();
-
-                return true;
+                await connection.InsertAsync(def);
             }
+
+            _cache = await GetTableDefinitionsAsync();
+
+            return true;
         }
 
         private async Task DeleteTableAsync(string tableName)
@@ -290,37 +290,13 @@ namespace WebCrudProject.Services.ORM
             }
         }
 
-        private async Task ThanosColumn(string i,string tableClass)
+        private async Task ThanosColumn(string snapsfingers,string thanos)
         {
             using (var connection = CreateConnecton())
             {
-                var query = $"ALTER TABLE {tableClass} ALTER COLUMN {i} NULL";
+                var query = $"ALTER TABLE {thanos} ALTER COLUMN {snapsfingers} NULL";
                 await connection.ExecuteAsync(query);
             }
-        }
-
-        // Check Dapper.Contrib for insterting, might fix my error?
-        private async Task InsertTableDefinition(TableDefinition model, SqlConnection connection)
-        {
-            var names = _tableDefinitionProperties.GetNames();
-
-            var builder = new StringBuilder();
-
-            builder.AppendLine(@$"INSERT INTO {_tableDefinitionTable} (");
-
-            foreach (var name in names)
-            {
-                builder.AppendLine($"{name}" +
-                    $"{(name == names.Last() ? ") VALUES (" : ",")}");
-            }
-
-            foreach (var name in names)
-            {
-                builder.AppendLine($"@{name}" +
-                    $"{(name == names.Last() ? ");" : ",")}");
-            }
-
-            await connection.ExecuteAsync(builder.ToString(), model);
         }
 
         private async Task UpdateTableDefinition(TableDefinition model, SqlConnection connection = null)
