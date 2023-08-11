@@ -1,37 +1,48 @@
 ﻿@using System.Security.Claims
-@model List<UserDocument>
+@model DefaultViewModel
 @{
     ViewData["Title"] = "Home Page";
+    Layout = "_Layout";
 }
-
 <div class="text-center">
-   
-   <a asp-controller="Document" asp-action="Index">Create Document</a>
 
-    @if (Model != null)
+    @if (Model.IsAuthenticated)
     {
-           <div>
-       <p>documents</p>
-
-       @foreach (var doc in Model)
-       {
-           <div class="border-2">
-               <p>@doc.DocumentTitle</p>
-                    @Html.ActionLink("Edit","Update","Document", new { number = doc.DocumentNumber }, new {});
-                    @Html.ActionLink("Delete", "DeleteDocument", "Document", new  { number = doc.DocumentNumber }, new{})
-           </div>
-       }
-       </div>
+        @Model.Email
     }
+    else
+    {
+        <partial name="_AuthenticationPartial" for="AuthenticationModel" />
 
-    &nbsp;
-    <div class="w-50 text-center bg-info">
-        <form asp-controller="Upload" asp-action="Files" method="post" enctype="multipart/form-data">
-            @Html.AntiForgeryToken()
-            <p>Select Files</p>
-            <input type="file" name="files" placeholder="Upload" accept="image/*" />
-            <br />
-            <input class="btn btn-primary" type="submit" value="Send" />
-        </form>
-    </div>
+        <table class="model-state">
+            @foreach (var item in Model.ErrorList)
+            {
+                <tr>
+                    <td><b>@item</b></td>
+                </tr>
+            }
+        </table>
+
+        <style>
+            table.model-state {
+                border-color: #600;
+                border-width: 0 0 1px 1px;
+                border-style: solid;
+                border-collapse: collapse;
+                font-size: .8em;
+                font-family: arial;
+                width: 50%;
+                margin: auto;
+            }
+
+                table.model-state td {
+                    border-color: #600;
+                    border-width: 1px 1px 0 0;
+                    border-style: solid;
+                    margin: 0;
+                    padding: .25em .75em;
+                    background-color: #FFC;
+                }
+        </style>
+    }
 </div>

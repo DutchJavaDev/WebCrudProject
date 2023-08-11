@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32825.248
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebCrudProject", "WebCrudProject\WebCrudProject.csproj", "{AFD0B000-D74D-4B01-963E-9E0C0274867A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebCrudProject", "WebCrudProject\WebCrudProject.csproj", "{AFD0B000-D74D-4B01-963E-9E0C0274867A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebCrudProjectTests", "WebCrudProjectTests\WebCrudProjectTests.csproj", "{92C3093D-6476-46D6-8588-634F89E1AA5F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{AFD0B000-D74D-4B01-963E-9E0C0274867A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFD0B000-D74D-4B01-963E-9E0C0274867A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AFD0B000-D74D-4B01-963E-9E0C0274867A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92C3093D-6476-46D6-8588-634F89E1AA5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92C3093D-6476-46D6-8588-634F89E1AA5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92C3093D-6476-46D6-8588-634F89E1AA5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92C3093D-6476-46D6-8588-634F89E1AA5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

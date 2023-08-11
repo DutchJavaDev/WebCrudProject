@@ -1,21 +1,46 @@
 using WebCrudProject.Auth;
-using WebCrudProject.Service;
+using WebCrudProject.Auth.Models;
+using WebCrudProject.Auth.Services;
+using WebCrudProject.Auth.Services.Interfaces;
+using WebCrudProject.Services.Email;
+using WebCrudProject.Services.Email.Interfaces;
+using WebCrudProject.Services.ORM;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddSession();
 
 var connectionString = builder.Configuration.GetConnectionString("Default");
 
-builder.Services.AddScoped(p => { return new UserDbService(connectionString); });
-builder.Services.AddScoped(p => { return new UserDocumentDbService(connectionString); });
-builder.Services.AddScoped(p => { return new UserFileService(connectionString); });
+var types = new Type[] 
+{ 
+    typeof(ELUser), 
+    typeof(ELJwtSession)
+};
+
+var sqlOrm = new SqlServerORM();
+await sqlOrm.InitAsync(connectionString, types);
+
+// Add services to the container.
+builder.Services.AddSingleton(sqlOrm);
+
+builder.Services.AddScoped((context) => 
+{
+    var iorm = context.GetService<SqlServerORM>();
+    return iorm.GetObjectContext();
+});
+
+builder.Services.AddScoped<ISessionService,SessionService>();
+
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+
+builder.Services.AddScoped<IELMailService, ELMailService>();
+
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-//app.Use(UploadMiddelware.UploadFilter);
-app.Use(SignInMiddelware.CheckSignIn);
+app.UseSession();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -24,6 +49,8 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.Use(AuthenticationMiddelWare.SessionResolve);
 
 app.UseHttpsRedirection();
 
