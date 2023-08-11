@@ -35,7 +35,7 @@ namespace WebCrudProject.Services.ORM
         // Check to see if this is the first tume running or not
         private async Task EnsureDefaultDefinitions()
         {
-            if (!await TableExistsAsync(_tableDefinitionTable))
+           /* if (!await TableExistsAsync(_tableDefinitionTable))
             {
                 var tableParams = Common.ConverToSQLTypes(_tableDefinitionProperties);
 
@@ -49,7 +49,7 @@ namespace WebCrudProject.Services.ORM
                 await CheckForTableDefinitionUpdate(TableDefinition, _tableAttribute, tableParams);
             }
 
-            _cache = await GetTableDefinitionsAsync();
+            _cache = await GetTableDefinitionsAsync();*/
         }
 
         public TableAttribute GetTableAttribute(Type type)
