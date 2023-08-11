@@ -14,7 +14,7 @@ namespace WebCrudProject.Auth.Services
         public async Task<string> CreateSessionAsync(ELUser requester)
         {
             var created = DateTime.Now;
-            var expired = created.AddSeconds(30);
+            var expired = created.AddMinutes(5);
             var id = Guid.NewGuid().ToString().Replace("-","");
 
             var session = new ELJwtSession 

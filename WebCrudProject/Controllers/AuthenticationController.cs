@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text;
+using Microsoft.AspNetCore.Mvc;
 using WebCrudProject.Auth.Models;
 using WebCrudProject.Auth.Services.Interfaces;
 using WebCrudProject.Services.Email.Interfaces;
@@ -8,10 +9,34 @@ namespace WebCrudProject.Controllers
     public class AuthenticationController : BaseController
     {
         [HttpGet]
-        public async Task<IActionResult> Logout()
+        public async Task<IActionResult> Logout([FromServices] ISessionService sessionService)
         {
-            SetSessionId(string.Empty);
+            if(TryGetSessionId(HttpContext, out var id))
+            {
+                var _session = await sessionService.ResolveSessionAsync(id);
+                await sessionService.DeleteSessionAsync(_session.Item2.Id);
+            }
+
             return RedirectToAction("Index","Home");
+        }
+
+        private static bool TryGetSessionId(HttpContext request, out string sessionId)
+        {
+            byte[]? byteArrayResult;
+
+            var boolResult = request.Session.TryGetValue("", out byteArrayResult);
+
+            if (boolResult 
+                && byteArrayResult != null)
+            {
+                sessionId = Encoding.UTF8.GetString(byteArrayResult);
+            }
+            else
+            {
+                sessionId = string.Empty;
+            }
+
+            return boolResult;
         }
 
         [HttpPost]

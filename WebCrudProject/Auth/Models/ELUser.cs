@@ -11,6 +11,7 @@ namespace WebCrudProject.Auth.Models
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string CompressedRoles { get; set; } = string.Empty;
+        public bool IsAdmin {get; set; }
         public DateTime LastUpdated { get; set; }
         public DateTime DateCreated { get; set; }
 
