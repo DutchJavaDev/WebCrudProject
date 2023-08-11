@@ -11,7 +11,7 @@ namespace WebCrudProject.Services
         public static string ToSingleString(this IEnumerable<string> strings, string seperator = ",")
         {
             var builder = new StringBuilder();
-
+            
             foreach (var str in strings)
             {
                 builder.Append($"{str}{(str == strings.Last() ? ";" : $"{seperator} ")}");

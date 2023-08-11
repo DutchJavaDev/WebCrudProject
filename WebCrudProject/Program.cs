@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSession();
 
-var connectionString = builder.Configuration.GetConnectionString("Default");
+var connectionString = "Data Source=webcrudproject-server.database.windows.net,1433;Initial Catalog=webcrudproject-database;User ID=webcrudproject-server-admin;Password=U5U5B70088J1E3Y1$";
 
 var types = new Type[] 
 { 
