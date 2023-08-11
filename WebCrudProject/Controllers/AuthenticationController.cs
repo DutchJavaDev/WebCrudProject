@@ -44,8 +44,11 @@ namespace WebCrudProject.Controllers
                             var sessionId = await session.CreateSessionAsync(user);
                             SetSessionId(sessionId);
                         }
-
-                        ModelState.AddModelError("Register fail", "Register failed");
+                        else
+                        {
+                            ModelState.AddModelError("register error", "User already exists");
+                        }
+                        
                         break;
 
                     default: break;

@@ -22,6 +22,8 @@ var sqlOrm = new SqlServerORM();
 await sqlOrm.InitAsync(connectionString, types);
 
 // Add services to the container.
+builder.Services.AddSession();
+
 builder.Services.AddSingleton(sqlOrm);
 
 builder.Services.AddScoped((context) => 

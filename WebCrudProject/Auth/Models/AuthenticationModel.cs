@@ -18,7 +18,7 @@ namespace WebCrudProject.Auth.Models
 
     public sealed class AuthenticationModel
     {
-        public UserAuthenticationState AuthenticationType { get; set; } = UserAuthenticationState.Register;
+        public UserAuthenticationState AuthenticationType { get; set; } = UserAuthenticationState.Login;
         [Required, DataType(DataType.EmailAddress)]
         public string Email { get; set; } = string.Empty;
         [Required, DataType(DataType.Password)]

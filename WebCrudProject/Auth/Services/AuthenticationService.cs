@@ -16,19 +16,19 @@ namespace WebCrudProject.Auth.Services
         public async Task<ELUser> LoginAsync(AuthenticationModel model)
         {
             var exists = (await _context.GetListAsync<ELUser>())
-                .Where(i => i.Email == model.Email);
+                .Where(i => i.Email.ToLower() == model.Email.ToLower());
 
             if (!exists.Any())
             {
                 return null;
             }
 
-            var db = exists.FirstOrDefault();
+            var dbUser = exists.FirstOrDefault();
 
-            if (BCryptNet.Verify(model.Password, db.Password))
+            if (BCryptNet.Verify(model.Password, dbUser.Password))
             {
-                db.Password = string.Empty;
-                return db;
+                dbUser.Password = string.Empty;
+                return dbUser;
             }
 
             return null;
@@ -37,7 +37,7 @@ namespace WebCrudProject.Auth.Services
         public async Task<bool> RegisterAsync(AuthenticationModel model)
         {
             var exists = (await _context.GetListAsync<ELUser>())
-                .Where(i => i.Email == model.Email);
+                .Where(i => i.Email.ToLower() == model.Email.ToLower());
 
             if(exists.Any())
             { 
