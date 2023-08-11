@@ -7,6 +7,13 @@ namespace WebCrudProject.Controllers
 {
     public class AuthenticationController : BaseController
     {
+        [HttpGet]
+        public async Task<IActionResult> Logout()
+        {
+            SetSessionId(string.Empty);
+            return RedirectToAction("Index","Home");
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(
@@ -23,8 +30,6 @@ namespace WebCrudProject.Controllers
                         var user = await authentication.LoginAsync(authenticationModel);
                         if (user == null)
                         {
-                            // Back to login page ??
-                            // Bla bla bla :D
                             ModelState.AddModelError("Login fail", "Login failed");
                         }
                         else
